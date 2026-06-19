@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { getAreaBySlug } from "@/lib/tools-config";
+import { UPLOAD_FORMAT_HINT } from "@/lib/upload-formats";
+import DocumentUploadZone from "@/components/dashboard/DocumentUploadZone";
 
 export default function AreaDetailPage() {
   const params = useParams();
@@ -29,7 +31,7 @@ export default function AreaDetailPage() {
 
   const handleSubmit = async () => {
     if (!tool || input.length < 10) {
-      setError("Digite pelo menos 10 caracteres.");
+      setError("Digite, cole ou envie um PDF/Word com pelo menos 10 caracteres.");
       return;
     }
 
@@ -97,13 +99,22 @@ export default function AreaDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border border-surface-200 bg-white p-6">
+          <DocumentUploadZone
+            disabled={loading}
+            onTextExtracted={(text) => {
+              setInput(text);
+              setError("");
+            }}
+            onError={setError}
+          />
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Descreva ou cole o conteúdo para ${tool?.name ?? "ferramenta"}...`}
+            placeholder={`Cole o texto ou envie PDF/Word para ${tool?.name ?? "ferramenta"}...`}
             rows={14}
-            className="w-full resize-none rounded-xl border border-surface-200 px-4 py-3 text-sm outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+            className="mt-4 w-full resize-none rounded-xl border border-surface-200 px-4 py-3 text-sm outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
           />
+          <p className="mt-2 text-[11px] text-zinc-400">{UPLOAD_FORMAT_HINT}</p>
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
           <button
             type="button"

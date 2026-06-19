@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { contactInfo } from "@/lib/data";
+import { UPLOAD_FORMAT_HINT } from "@/lib/upload-formats";
+import DocumentUploadZone from "@/components/dashboard/DocumentUploadZone";
 import SectionHeader from "./SectionHeader";
 
 const serviceOptions = [
@@ -28,6 +30,9 @@ const serviceOptions = [
 export default function Contact({ hideHeader = false }: { hideHeader?: boolean }) {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [attachmentName, setAttachmentName] = useState<string | null>(null);
+  const [attachmentText, setAttachmentText] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,6 +41,16 @@ export default function Contact({ hideHeader = false }: { hideHeader?: boolean }
 
     const form = e.currentTarget;
     const fd = new FormData(form);
+    const userMessage = String(fd.get("message") ?? "");
+
+    let message = userMessage;
+    if (attachmentText && attachmentName) {
+      const excerpt =
+        attachmentText.length > 8000
+          ? `${attachmentText.slice(0, 8000)}\n\n[... material truncado — arquivo completo: ${attachmentName}]`
+          : attachmentText;
+      message = `--- Material anexo: ${attachmentName} ---\n${excerpt}\n---\n\n${userMessage}`;
+    }
 
     try {
       const res = await fetch("/api/contact", {
@@ -48,12 +63,14 @@ export default function Contact({ hideHeader = false }: { hideHeader?: boolean }
           course: fd.get("course"),
           service: fd.get("service"),
           deadline: fd.get("deadline") || undefined,
-          message: fd.get("message"),
+          message,
         }),
       });
 
       if (!res.ok) throw new Error("Falha ao enviar");
       setSubmitted(true);
+      setAttachmentName(null);
+      setAttachmentText("");
       form.reset();
     } catch {
       alert("Erro ao enviar. Tente novamente ou use o WhatsApp.");
@@ -294,6 +311,25 @@ export default function Contact({ hideHeader = false }: { hideHeader?: boolean }
                 </div>
 
                 <div className="mt-5">
+                  <label className="mb-1.5 block text-sm font-medium text-surface-900">
+                    Material do trabalho (opcional)
+                  </label>
+                  <DocumentUploadZone
+                    disabled={loading}
+                    onTextExtracted={(text, fileName) => {
+                      setAttachmentText(text);
+                      setAttachmentName(fileName);
+                      setUploadError("");
+                    }}
+                    onError={setUploadError}
+                  />
+                  {uploadError && (
+                    <p className="mt-2 text-sm text-red-600">{uploadError}</p>
+                  )}
+                  <p className="mt-2 text-[11px] text-zinc-400">{UPLOAD_FORMAT_HINT}</p>
+                </div>
+
+                <div className="mt-5">
                   <label
                     htmlFor="message"
                     className="mb-1.5 block text-sm font-medium text-surface-900"
@@ -305,7 +341,7 @@ export default function Contact({ hideHeader = false }: { hideHeader?: boolean }
                     name="message"
                     required
                     rows={5}
-                    placeholder="Conte-nos sobre o trabalho, tema, número de páginas, requisitos da instituição..."
+                    placeholder="Conte-nos sobre o trabalho, tema, número de páginas, requisitos da instituição... Ou envie PDF/Word acima."
                     className="w-full resize-none rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm transition-colors outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
                   />
                 </div>

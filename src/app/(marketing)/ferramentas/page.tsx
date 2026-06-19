@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Features from "@/components/Features";
+import FerramentasShowcase from "@/components/FerramentasShowcase";
 import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
   title: "Ferramentas IA — MentorUp",
   description:
-    "Mapas mentais, questões de PDF, flashcards, referências ABNT e ferramentas por área. 15 créditos grátis por mês.",
+    "Mais de 39 ferramentas de IA para estudantes: mapas mentais, questões, flashcards, ABNT e ferramentas por área do conhecimento.",
 };
 
 export default function FerramentasPage() {
@@ -15,13 +15,13 @@ export default function FerramentasPage() {
         label="Plataforma IA"
         title={
           <>
-            Ferramentas de IA para{" "}
-            <span className="text-gradient">estudar melhor</span>
+            Mais de{" "}
+            <span className="text-gradient">39 ferramentas</span> para você
           </>
         }
-        description="Tudo que você precisa no dia a dia acadêmico — comece grátis, sem cartão."
+        description="Do PDF ao mapa mental, da prova simulada ao relatório de estágio — tudo pensado para a vida real da faculdade."
       />
-      <Features hideHeader />
+      <FerramentasShowcase />
     </>
   );
 }

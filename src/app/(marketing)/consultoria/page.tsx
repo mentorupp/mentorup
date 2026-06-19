@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import CTA from "@/components/CTA";
+import ConsultoriaShowcase from "@/components/ConsultoriaShowcase";
 import PageHero from "@/components/PageHero";
-import Services from "@/components/Services";
 
 export const metadata: Metadata = {
   title: "Consultoria Acadêmica — MentorUp",
   description:
-    "TCC, estágio, relatórios e artigos com mentores especialistas. Valores a partir de R$ 22.",
+    "TCC, estágio, relatórios e artigos com mentores especialistas. 98% de aprovação, preços transparentes a partir de R$ 22.",
 };
 
 export default function ConsultoriaPage() {
@@ -16,14 +15,13 @@ export default function ConsultoriaPage() {
         label="Consultoria humana"
         title={
           <>
-            Mentoria para{" "}
-            <span className="text-gradient">entregas que importam</span>
+            A consultoria acadêmica{" "}
+            <span className="text-gradient">referência do Brasil</span>
           </>
         }
-        description="Especialistas de mestrado e doutorado. Preço fixo por serviço — TCC com orçamento gratuito por etapa."
+        description="Mentores de mestrado e doutorado. Preço fixo, originalidade garantida e suporte real — do fichamento ao TCC."
       />
-      <Services hideHeader />
-      <CTA />
+      <ConsultoriaShowcase />
     </>
   );
 }

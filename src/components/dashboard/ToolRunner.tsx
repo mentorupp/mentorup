@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Loader2, Sparkles, Upload } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { getToolById } from "@/lib/tools-config";
+import { UPLOAD_FORMAT_HINT } from "@/lib/upload-formats";
+import DocumentUploadZone from "./DocumentUploadZone";
 import MindMapViewer from "./MindMapViewer";
 import QuizViewer from "./QuizViewer";
 import FlashcardViewer from "./FlashcardViewer";
@@ -30,7 +32,7 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
 
   const handleSubmit = async () => {
     if (input.trim().length < 10) {
-      setError("Digite ou cole pelo menos 10 caracteres.");
+      setError("Digite, cole ou envie um PDF/Word com pelo menos 10 caracteres.");
       return;
     }
 
@@ -66,18 +68,6 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.type === "text/plain" || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
-      const text = await file.text();
-      setInput(text);
-    } else {
-      setError("Por enquanto, cole o texto do PDF ou envie arquivos .txt/.md. Suporte completo a PDF em breve.");
-    }
-  };
-
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="space-y-4">
@@ -89,21 +79,24 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
             </span>
           </div>
 
-          <label className="mb-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-surface-200 bg-surface-50 py-8 transition-colors hover:border-primary-300 hover:bg-primary-50/50">
-            <Upload size={24} className="text-zinc-400" />
-            <span className="mt-2 text-sm font-medium text-zinc-600">
-              Enviar arquivo (.txt, .md)
-            </span>
-            <input type="file" accept=".txt,.md,text/plain" className="hidden" onChange={handleFileUpload} />
-          </label>
+          <DocumentUploadZone
+            disabled={loading}
+            onTextExtracted={(text) => {
+              setInput(text);
+              setError("");
+            }}
+            onError={setError}
+          />
 
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={placeholder ?? "Cole ou digite o conteúdo aqui..."}
             rows={12}
-            className="w-full resize-none rounded-xl border border-surface-200 px-4 py-3 text-sm outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+            className="mt-4 w-full resize-none rounded-xl border border-surface-200 px-4 py-3 text-sm outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
           />
+
+          <p className="mt-2 text-[11px] text-zinc-400">{UPLOAD_FORMAT_HINT}</p>
 
           {extraFields}
 

@@ -5,16 +5,16 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 const toolPages: Record<string, { placeholder: string }> = {
-  "mind-map": { placeholder: "Cole o conteúdo do PDF, artigo ou aula para gerar o mapa mental..." },
-  "pdf-quiz": { placeholder: "Cole o texto do material de estudo para gerar questões..." },
-  rewrite: { placeholder: "Cole o texto que deseja reescrever ou melhorar..." },
-  summarize: { placeholder: "Cole o material completo para resumir..." },
-  flashcards: { placeholder: "Cole o conteúdo para gerar flashcards de estudo..." },
+  "mind-map": { placeholder: "Envie PDF/Word ou cole o conteúdo da aula, artigo ou capítulo..." },
+  "pdf-quiz": { placeholder: "Envie PDF/Word ou cole o material de estudo para gerar questões..." },
+  rewrite: { placeholder: "Envie PDF/Word ou cole o texto que deseja reescrever..." },
+  summarize: { placeholder: "Envie PDF/Word ou cole o material completo para resumir..." },
+  flashcards: { placeholder: "Envie PDF/Word ou cole o conteúdo para gerar flashcards..." },
   references: { placeholder: "Informe: autor, título, ano, editora, URL ou DOI..." },
-  grammar: { placeholder: "Cole o texto para correção gramatical..." },
-  "chat-pdf": { placeholder: "Cole o conteúdo do documento e depois faça sua pergunta no início do texto..." },
-  "exam-sim": { placeholder: "Cole o material da disciplina para gerar um simulado completo..." },
-  "case-study": { placeholder: "Descreva o caso ou cole o material para estruturar o estudo de caso..." },
+  grammar: { placeholder: "Envie PDF/Word ou cole o texto para correção gramatical..." },
+  "chat-pdf": { placeholder: "Envie PDF/Word ou cole o documento — depois faça sua pergunta no início do texto..." },
+  "exam-sim": { placeholder: "Envie PDF/Word ou cole o material da disciplina para o simulado..." },
+  "case-study": { placeholder: "Envie PDF/Word, cole o material ou descreva o caso..." },
 };
 
 export default async function ToolPage({

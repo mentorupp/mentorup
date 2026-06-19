@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import DepoimentosShowcase from "@/components/DepoimentosShowcase";
 import PageHero from "@/components/PageHero";
-import Testimonials from "@/components/Testimonials";
 
 export const metadata: Metadata = {
   title: "Depoimentos — MentorUp",
-  description: "Histórias reais de estudantes que usam a MentorUp em universidades de todo o Brasil.",
+  description:
+    "Histórias detalhadas de estudantes da USP, UFMG, UNICAMP e mais. Contexto, serviço usado e resultado concreto em cada caso.",
 };
 
 export default function DepoimentosPage() {
@@ -14,13 +15,13 @@ export default function DepoimentosPage() {
         label="Depoimentos"
         title={
           <>
-            Aprovado por quem{" "}
-            <span className="text-gradient">usa todo dia</span>
+            Histórias reais,{" "}
+            <span className="text-gradient">resultados concretos</span>
           </>
         }
-        description="Histórias reais de graduandos em USP, UFMG, PUC e mais."
+        description="Cada depoimento traz contexto, o que foi feito e o resultado — de TCC e estágio até flashcards e mapas mentais."
       />
-      <Testimonials hideHeader />
+      <DepoimentosShowcase />
     </>
   );
 }
