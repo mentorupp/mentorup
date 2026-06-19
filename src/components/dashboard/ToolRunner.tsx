@@ -5,18 +5,22 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Loader2, Sparkles, Upload } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import type { ToolConfig } from "@/lib/tools-config";
+import { getToolById } from "@/lib/tools-config";
 import MindMapViewer from "./MindMapViewer";
 import QuizViewer from "./QuizViewer";
 import FlashcardViewer from "./FlashcardViewer";
 
 interface ToolRunnerProps {
-  tool: ToolConfig;
+  toolId: string;
   placeholder?: string;
   extraFields?: React.ReactNode;
 }
 
-export default function ToolRunner({ tool, placeholder, extraFields }: ToolRunnerProps) {
+export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRunnerProps) {
+  const tool = getToolById(toolId);
+  if (!tool) {
+    return <p className="text-sm text-red-600">Ferramenta não encontrada.</p>;
+  }
   const [input, setInput] = useState("");
   const [result, setResult] = useState<string | Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);

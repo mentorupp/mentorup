@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { logActivity } from "@/lib/activity";
+import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { PLAN_CREDITS } from "@/lib/tools-config";
 
@@ -32,6 +34,7 @@ export async function POST(req: Request) {
     }
 
     const hashed = await bcrypt.hash(data.password, 12);
+    const admin = isAdminEmail(data.email);
 
     const user = await prisma.user.create({
       data: {
@@ -42,8 +45,15 @@ export async function POST(req: Request) {
         course: data.course,
         university: data.university,
         credits: PLAN_CREDITS.FREE,
+        role: admin ? "ADMIN" : "USER",
       },
       select: { id: true, email: true, name: true },
+    });
+
+    await logActivity("REGISTER", {
+      userId: user.id,
+      label: user.email,
+      meta: { course: data.course, university: data.university },
     });
 
     return NextResponse.json({ user }, { status: 201 });

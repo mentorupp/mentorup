@@ -2,6 +2,7 @@ import type { ToolType } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateAI } from "@/lib/ai";
+import { logActivity } from "@/lib/activity";
 import { auth } from "@/lib/auth";
 import { checkAndDeductCredits } from "@/lib/credits";
 import { prisma } from "@/lib/prisma";
@@ -90,6 +91,12 @@ export async function POST(req: Request) {
       title ?? tool.name,
       { toolId, inputLength: input.length }
     );
+
+    await logActivity("TOOL_USE", {
+      userId: session.user.id,
+      label: tool.name,
+      meta: { toolId, credits: tool.credits },
+    });
 
     let userPrompt = input;
     if (options) {

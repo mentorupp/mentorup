@@ -1,13 +1,14 @@
 import { differentials } from "@/lib/data";
 import SectionHeader from "./SectionHeader";
 
-export default function About() {
+export default function About({ hideHeader = false }: { hideHeader?: boolean }) {
   return (
-    <section id="sobre" className="section-padding bg-[#f8f9fb]">
+    <section className="section-padding bg-[#f8f9fb]">
       <div className="container-custom">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <div>
-            <SectionHeader
+            {!hideHeader && (
+              <SectionHeader
               align="left"
               label="Sobre"
               title={
@@ -18,7 +19,8 @@ export default function About() {
               }
               description="Fundada por ex-coordenadores acadêmicos. Mais de 150 mentores especialistas e 200+ instituições atendidas."
               className="mb-6"
-            />
+              />
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               {differentials.map((item) => {

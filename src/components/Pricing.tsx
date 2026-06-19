@@ -17,13 +17,14 @@ function formatPrice(value: number) {
   });
 }
 
-export default function Pricing() {
+export default function Pricing({ hideHeader = false }: { hideHeader?: boolean }) {
   const categories = ["rapido", "entrega", "projeto", "tcc"] as const;
 
   return (
-    <section id="planos" className="section-padding bg-[#f8f9fb]">
+    <section className="section-padding bg-[#f8f9fb]">
       <div className="container-custom">
-        <SectionHeader
+        {!hideHeader && (
+          <SectionHeader
           label="Planos & Valores"
           title={
             <>
@@ -32,7 +33,8 @@ export default function Pricing() {
             </>
           }
           description="Ferramentas IA a partir de R$ 0. Consultoria humana a partir de R$ 22 — sem pacotes de R$ 600+."
-        />
+          />
+        )}
 
         {/* Plataforma IA */}
         <div className="mb-14">
@@ -136,7 +138,7 @@ export default function Pricing() {
                         </span>
                       ) : (
                         <Link
-                          href="#contato"
+                          href="/contato"
                           className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 transition-colors hover:bg-primary-100"
                         >
                           <MessageCircle size={13} />
@@ -202,7 +204,7 @@ export default function Pricing() {
                   ))}
                 </ul>
 
-                <Link href="#contato" className="btn-secondary mt-4 py-2.5 text-xs">
+                <Link href="/contato" className="btn-secondary mt-4 py-2.5 text-xs">
                   Pedir este pacote
                 </Link>
               </div>

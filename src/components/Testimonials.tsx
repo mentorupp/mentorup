@@ -5,7 +5,7 @@ import { useState } from "react";
 import { testimonials } from "@/lib/data";
 import SectionHeader from "./SectionHeader";
 
-export default function Testimonials() {
+export default function Testimonials({ hideHeader = false }: { hideHeader?: boolean }) {
   const [active, setActive] = useState(0);
 
   const next = () => setActive((prev) => (prev + 1) % testimonials.length);
@@ -13,9 +13,10 @@ export default function Testimonials() {
     setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
   return (
-    <section id="depoimentos" className="section-padding border-t border-zinc-200/60 bg-white">
+    <section className="section-padding bg-white">
       <div className="container-custom">
-        <SectionHeader
+        {!hideHeader && (
+          <SectionHeader
           label="Depoimentos"
           title={
             <>
@@ -24,7 +25,8 @@ export default function Testimonials() {
             </>
           }
           description="Histórias reais de estudantes em universidades de todo o Brasil."
-        />
+          />
+        )}
 
         <div className="relative mx-auto max-w-3xl">
           <div className="card-premium overflow-hidden p-6 sm:p-8">

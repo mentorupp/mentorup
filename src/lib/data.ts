@@ -78,15 +78,17 @@ export interface Stat {
 }
 
 export const navLinks = [
-  { href: "#inicio", label: "Início" },
-  { href: "#ferramentas", label: "Ferramentas IA" },
-  { href: "#servicos", label: "Consultoria" },
-  { href: "#como-funciona", label: "Como Funciona" },
-  { href: "#depoimentos", label: "Depoimentos" },
-  { href: "#planos", label: "Planos" },
-  { href: "#faq", label: "FAQ" },
-  { href: "#contato", label: "Contato" },
+  { href: "/", label: "Início" },
+  { href: "/ferramentas", label: "Ferramentas IA" },
+  { href: "/consultoria", label: "Consultoria" },
+  { href: "/como-funciona", label: "Como Funciona" },
+  { href: "/depoimentos", label: "Depoimentos" },
+  { href: "/planos", label: "Planos" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/contato", label: "Contato" },
 ];
+
+export const footerLinks = [{ href: "/sobre", label: "Sobre nós" }];
 
 export const services: Service[] = [
   {

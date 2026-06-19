@@ -5,17 +5,19 @@ import { useState } from "react";
 import { faqItems } from "@/lib/data";
 import SectionHeader from "./SectionHeader";
 
-export default function FAQ() {
+export default function FAQ({ hideHeader = false }: { hideHeader?: boolean }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="section-padding border-t border-zinc-200/60 bg-white">
+    <section className="section-padding bg-white">
       <div className="container-custom">
-        <SectionHeader
+        {!hideHeader && (
+          <SectionHeader
           label="FAQ"
           title={<>Perguntas frequentes</>}
           description="Tudo que você precisa saber antes de começar."
-        />
+          />
+        )}
 
         <div className="mx-auto max-w-2xl space-y-2">
           {faqItems.map((item, index) => {

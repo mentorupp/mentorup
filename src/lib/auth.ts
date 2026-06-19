@@ -4,8 +4,10 @@ import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import type { Provider } from "next-auth/providers";
 import { authConfig } from "./auth.config";
+import { isAdminEmail } from "./admin";
 import { prisma } from "./prisma";
 import { PLAN_CREDITS } from "./tools-config";
+import { logActivity } from "./activity";
 
 const providers: Provider[] = [
   Credentials({
@@ -29,6 +31,19 @@ const providers: Provider[] = [
       );
 
       if (!valid) return null;
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          lastLoginAt: new Date(),
+          ...(isAdminEmail(user.email) ? { role: "ADMIN" as const } : {}),
+        },
+      }).catch(() => {});
+
+      await logActivity("LOGIN", {
+        userId: user.id,
+        label: user.email,
+      });
 
       return {
         id: user.id,
@@ -65,6 +80,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             select: {
               credits: true,
               plan: true,
+              role: true,
               area: true,
               course: true,
               name: true,
@@ -73,6 +89,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (dbUser) {
             token.credits = dbUser.credits;
             token.plan = dbUser.plan;
+            token.role = dbUser.role;
             token.area = dbUser.area;
             token.course = dbUser.course;
             token.name = dbUser.name;
@@ -85,6 +102,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (trigger === "update" && session) {
         token.credits = session.credits;
         token.plan = session.plan;
+        token.role = session.role;
         token.area = session.area;
         token.course = session.course;
       }
@@ -96,6 +114,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string;
         session.user.credits = (token.credits as number) ?? 15;
         session.user.plan = (token.plan as string) ?? "FREE";
+        session.user.role = (token.role as string) ?? "USER";
         session.user.area = (token.area as string | null) ?? null;
         session.user.course = (token.course as string | null) ?? null;
       }

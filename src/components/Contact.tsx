@@ -25,23 +25,48 @@ const serviceOptions = [
   "Outro",
 ];
 
-export default function Contact() {
+export default function Contact({ hideHeader = false }: { hideHeader?: boolean }) {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setSubmitted(false);
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fd.get("name"),
+          email: fd.get("email"),
+          phone: fd.get("phone"),
+          course: fd.get("course"),
+          service: fd.get("service"),
+          deadline: fd.get("deadline") || undefined,
+          message: fd.get("message"),
+        }),
+      });
+
+      if (!res.ok) throw new Error("Falha ao enviar");
       setSubmitted(true);
-    }, 1500);
+      form.reset();
+    } catch {
+      alert("Erro ao enviar. Tente novamente ou use o WhatsApp.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <section id="contato" className="section-padding bg-[#f8f9fb]">
+    <section className="section-padding bg-[#f8f9fb]">
       <div className="container-custom">
-        <SectionHeader
+        {!hideHeader && (
+          <SectionHeader
           label="Contato"
           title={
             <>
@@ -50,7 +75,8 @@ export default function Contact() {
             </>
           }
           description="Orçamento gratuito. Resposta em até 2 horas úteis."
-        />
+          />
+        )}
 
         <div className="grid gap-8 lg:grid-cols-5">
           <div className="space-y-6 lg:col-span-2">

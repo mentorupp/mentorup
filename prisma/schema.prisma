@@ -13,6 +13,11 @@ enum Plan {
   PRO
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 enum ToolType {
   MIND_MAP
   PDF_QUIZ
@@ -31,6 +36,31 @@ enum ToolType {
   FORMULA_SHEET
 }
 
+enum ContactStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  CLOSED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  OVERDUE
+}
+
+enum ActivityType {
+  REGISTER
+  LOGIN
+  PAGE_VIEW
+  TOOL_USE
+  CONTACT_SUBMIT
+  BILLING_VIEW
+  PLAN_INTEREST
+  ADMIN_ACTION
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -43,14 +73,20 @@ model User {
   university    String?
   credits       Int       @default(15)
   plan          Plan      @default(FREE)
+  role          Role      @default(USER)
+  adminNote     String?   @db.Text
   creditsReset  DateTime  @default(now())
+  lastLoginAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts    Account[]
-  sessions    Session[]
-  usageLogs   UsageLog[]
-  savedItems  SavedItem[]
+  accounts       Account[]
+  sessions       Session[]
+  usageLogs      UsageLog[]
+  savedItems     SavedItem[]
+  activityEvents ActivityEvent[]
+  orders         Order[]
+  contactLeads   ContactLead[]
 }
 
 model Account {
@@ -111,4 +147,56 @@ model SavedItem {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, tool])
+}
+
+model ContactLead {
+  id        String        @id @default(cuid())
+  userId    String?
+  name      String
+  email     String
+  phone     String
+  course    String
+  service   String
+  deadline  DateTime?
+  message   String        @db.Text
+  status    ContactStatus @default(NEW)
+  adminNote String?       @db.Text
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  userId      String
+  description String
+  plan        Plan?
+  amountCents Int
+  status      OrderStatus @default(PENDING)
+  adminNote   String?     @db.Text
+  paidAt      DateTime?
+  dueAt       DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model ActivityEvent {
+  id        String       @id @default(cuid())
+  userId    String?
+  type      ActivityType
+  path      String?
+  label     String?
+  meta      Json?
+  createdAt DateTime     @default(now())
+  user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([type, createdAt])
+  @@index([userId, createdAt])
 }

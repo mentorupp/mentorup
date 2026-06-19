@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
+import { TrackBillingView } from "@/components/dashboard/TrackBilling";
 import { Check } from "lucide-react";
 
 const plans = [
@@ -59,6 +60,7 @@ export default async function BillingPage() {
 
   return (
     <div>
+      <TrackBillingView />
       <h1 className="font-display text-3xl font-extrabold">Planos & Créditos</h1>
       <p className="mt-1 text-zinc-600">
         Escolha o plano ideal. Pagamento via PIX e cartão em breve.
@@ -141,7 +143,7 @@ export default async function BillingPage() {
 
       <p className="mt-6 text-center text-sm text-zinc-500">
         Precisa de consultoria humana para TCC ou monografia?{" "}
-        <Link href="/#contato" className="font-semibold text-primary-600 hover:underline">
+        <Link href="/contato" className="font-semibold text-primary-600 hover:underline">
           Fale conosco
         </Link>
       </p>

@@ -9,7 +9,7 @@ import { stats } from "@/lib/data";
 
 export default function Hero() {
   return (
-    <section id="inicio" className="relative overflow-hidden pt-[4.5rem] pb-10 lg:pt-24 lg:pb-14">
+    <section className="relative overflow-hidden pt-[4.5rem] pb-10 lg:pt-24 lg:pb-14">
       <div className="pointer-events-none absolute inset-0 mesh-bg" />
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-60" />
 
@@ -37,7 +37,7 @@ export default function Hero() {
                 Começar grátis
                 <ArrowRight size={17} />
               </Link>
-              <Link href="#ferramentas" className="btn-secondary px-7 py-3.5 text-[15px]">
+              <Link href="/ferramentas" className="btn-secondary px-7 py-3.5 text-[15px]">
                 Ver ferramentas
               </Link>
             </div>

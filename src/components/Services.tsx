@@ -3,11 +3,12 @@ import Link from "next/link";
 import { services } from "@/lib/data";
 import SectionHeader from "./SectionHeader";
 
-export default function Services() {
+export default function Services({ hideHeader = false }: { hideHeader?: boolean }) {
   return (
-    <section id="servicos" className="section-padding border-t border-zinc-200/60 bg-white">
+    <section className="section-padding bg-white">
       <div className="container-custom">
-        <SectionHeader
+        {!hideHeader && (
+          <SectionHeader
           label="Consultoria humana"
           title={
             <>
@@ -16,7 +17,8 @@ export default function Services() {
             </>
           }
           description="Preços a partir de R$ 22. TCC por etapa com orçamento gratuito."
-        />
+          />
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => {
@@ -78,7 +80,7 @@ export default function Services() {
                 </ul>
 
                 <Link
-                  href="#planos"
+                  href="/planos"
                   className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary-600 transition-colors hover:text-primary-700"
                 >
                   Ver valores

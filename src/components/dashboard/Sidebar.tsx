@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   LogOut,
   Settings,
+  Shield,
   Sparkles,
   Stethoscope,
 } from "lucide-react";
@@ -88,6 +89,26 @@ export default function DashboardSidebar() {
             </Link>
           );
         })}
+
+        {session?.user?.role === "ADMIN" && (
+          <>
+            <p className="mt-6 mb-2 px-3 text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
+              Admin
+            </p>
+            <Link
+              href="/dashboard/admin"
+              className={cn(
+                "mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                pathname.startsWith("/dashboard/admin")
+                  ? "bg-red-50 text-red-700"
+                  : "text-zinc-600 hover:bg-red-50 hover:text-red-700"
+              )}
+            >
+              <Shield size={18} />
+              Painel Admin
+            </Link>
+          </>
+        )}
 
         <p className="mt-6 mb-2 px-3 text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
           Populares

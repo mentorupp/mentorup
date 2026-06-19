@@ -8,7 +8,7 @@ import {
   Youtube,
 } from "lucide-react";
 import Link from "next/link";
-import { contactInfo, navLinks, services } from "@/lib/data";
+import { contactInfo, footerLinks, navLinks, services } from "@/lib/data";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -18,7 +18,7 @@ export default function Footer() {
       <div className="container-custom px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="#inicio" className="flex items-center gap-2.5">
+            <Link href="/" className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-accent-500">
                 <span className="text-sm font-bold text-white">M</span>
               </div>
@@ -65,6 +65,16 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              {footerLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm transition-colors hover:text-primary-400"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -76,7 +86,7 @@ export default function Footer() {
               {services.slice(0, 6).map((service) => (
                 <li key={service.id}>
                   <Link
-                    href="#contato"
+                    href="/consultoria"
                     className="text-sm transition-colors hover:text-primary-400"
                   >
                     {service.title}

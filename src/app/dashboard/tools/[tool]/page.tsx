@@ -41,7 +41,7 @@ export default async function ToolPage({
           <p className="text-sm text-zinc-500">{tool.description}</p>
         </div>
       </div>
-      <ToolRunner tool={tool} placeholder={pageConfig.placeholder} />
+      <ToolRunner toolId={toolId} placeholder={pageConfig.placeholder} />
     </div>
   );
 }

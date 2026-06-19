@@ -2,6 +2,7 @@
 
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { navLinks } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 16);
@@ -23,6 +25,13 @@ export default function Header() {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   return (
     <header className="fixed top-0 right-0 left-0 z-50 px-4 pt-3 sm:px-6 lg:px-8">
       <div
@@ -33,7 +42,7 @@ export default function Header() {
             : "bg-transparent"
         )}
       >
-        <Link href="#inicio" className="group flex items-center gap-2">
+        <Link href="/" className="group flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 text-xs font-bold text-white shadow-md shadow-primary-500/25 transition group-hover:scale-105">
             M
           </div>
@@ -47,7 +56,12 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-zinc-600 transition hover:text-primary-600"
+              className={cn(
+                "rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition",
+                isActive(link.href)
+                  ? "bg-primary-50 text-primary-700"
+                  : "text-zinc-600 hover:text-primary-600"
+              )}
             >
               {link.label}
             </Link>
@@ -83,17 +97,21 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-primary-50"
+                className={cn(
+                  "rounded-lg px-3 py-2.5 text-sm font-medium",
+                  isActive(link.href)
+                    ? "bg-primary-50 text-primary-700"
+                    : "text-zinc-700 hover:bg-primary-50"
+                )}
               >
                 {link.label}
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2 border-t border-zinc-100 pt-3">
-              <Link href="/login" onClick={() => setIsOpen(false)} className="btn-secondary">
+              <Link href="/login" className="btn-secondary">
                 Entrar
               </Link>
-              <Link href="/register" onClick={() => setIsOpen(false)} className="btn-primary">
+              <Link href="/register" className="btn-primary">
                 Começar grátis
               </Link>
             </div>

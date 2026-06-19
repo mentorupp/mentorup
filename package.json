@@ -9,6 +9,7 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
+    "db:admin": "node scripts/set-admin.mjs",
     "db:setup": "node scripts/setup-db.mjs",
     "db:studio": "prisma studio"
   },

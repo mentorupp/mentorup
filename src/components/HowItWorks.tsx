@@ -1,20 +1,41 @@
 import { steps } from "@/lib/data";
 import SectionHeader from "./SectionHeader";
 
-export default function HowItWorks() {
+export default function HowItWorks({
+  hideHeader = false,
+  label = "Consultoria humana",
+  title = (
+    <>
+      Do pedido à{" "}
+      <span className="text-gradient">entrega final</span>
+    </>
+  ),
+  description = "Quatro passos. Sem complicação.",
+}: {
+  hideHeader?: boolean;
+  label?: string;
+  title?: React.ReactNode;
+  description?: string;
+}) {
   return (
-    <section id="como-funciona" className="section-padding bg-[#f8f9fb]">
+    <section className="section-padding bg-[#f8f9fb]">
       <div className="container-custom">
-        <SectionHeader
-          label="Como funciona"
-          title={
-            <>
-              Do material bruto ao{" "}
-              <span className="text-gradient">resultado pronto</span>
-            </>
-          }
-          description="Quatro passos. Sem complicação."
-        />
+        {!hideHeader && (
+          <SectionHeader
+            label={label}
+            title={title}
+            description={description}
+          />
+        )}
+        {hideHeader && (
+          <div className="mb-8">
+            <span className="section-label">{label}</span>
+            <h2 className="section-title mt-2">{title}</h2>
+            {description && (
+              <p className="mt-2 text-sm text-zinc-500">{description}</p>
+            )}
+          </div>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((item, i) => {

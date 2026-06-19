@@ -31,13 +31,14 @@ const highlights = [
   },
 ];
 
-export default function Features() {
+export default function Features({ hideHeader = false }: { hideHeader?: boolean }) {
   const coreTools = tools.filter((t) => t.category === "core");
 
   return (
-    <section id="ferramentas" className="section-padding border-t border-zinc-200/60 bg-white">
+    <section className="section-padding bg-white">
       <div className="container-custom">
-        <SectionHeader
+        {!hideHeader && (
+          <SectionHeader
           label="Plataforma IA"
           title={
             <>
@@ -46,7 +47,8 @@ export default function Features() {
             </>
           }
           description="15 créditos mensais grátis. Sem cartão. Comece em segundos."
-        />
+          />
+        )}
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {highlights.map((item) => {
