@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { contactInfo } from "@/lib/data";
+import SectionHeader from "./SectionHeader";
 
 const serviceOptions = [
   "TCC & Monografia",
@@ -38,25 +39,22 @@ export default function Contact() {
   };
 
   return (
-    <section id="contato" className="section-padding bg-white">
+    <section id="contato" className="section-padding bg-[#f8f9fb]">
       <div className="container-custom">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-sm font-semibold tracking-wider text-primary-600 uppercase">
-            Contato
-          </span>
-          <h2 className="font-display mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Vamos conversar sobre{" "}
-            <span className="text-gradient">seu projeto</span>
-          </h2>
-          <p className="mt-4 text-lg text-zinc-600">
-            Preencha o formulário ou entre em contato pelos nossos canais.
-            Respondemos em até 2 horas úteis.
-          </p>
-        </div>
+        <SectionHeader
+          label="Contato"
+          title={
+            <>
+              Fale com a gente em{" "}
+              <span className="text-gradient">minutos</span>
+            </>
+          }
+          description="Orçamento gratuito. Resposta em até 2 horas úteis."
+        />
 
-        <div className="mt-16 grid gap-10 lg:grid-cols-5">
+        <div className="grid gap-8 lg:grid-cols-5">
           <div className="space-y-6 lg:col-span-2">
-            <div className="rounded-2xl border border-surface-200 p-6">
+            <div className="card-premium p-5">
               <h3 className="font-display text-lg font-bold text-surface-900">
                 Canais de atendimento
               </h3>
@@ -138,7 +136,7 @@ export default function Contact() {
               href={`https://wa.me/${contactInfo.whatsapp}?text=Olá! Gostaria de solicitar um orçamento na MentorUp.`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent-500 to-accent-600 px-6 py-4 text-base font-semibold text-white shadow-lg shadow-accent-500/25 transition-all hover:shadow-xl hover:brightness-110"
+              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition-all hover:brightness-110"
             >
               <MessageCircle size={20} />
               Chamar no WhatsApp
@@ -162,7 +160,7 @@ export default function Contact() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="rounded-3xl border border-surface-200 bg-surface-50 p-6 sm:p-8"
+                className="card-premium p-5 sm:p-6"
               >
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>

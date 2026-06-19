@@ -1,35 +1,33 @@
 import { ArrowUpRight, Check } from "lucide-react";
 import Link from "next/link";
 import { services } from "@/lib/data";
+import SectionHeader from "./SectionHeader";
 
 export default function Services() {
   return (
-    <section id="servicos" className="section-padding bg-white">
+    <section id="servicos" className="section-padding border-t border-zinc-200/60 bg-white">
       <div className="container-custom">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-sm font-semibold tracking-wider text-primary-600 uppercase">
-            Nossos Serviços
-          </span>
-          <h2 className="font-display mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Tudo que você precisa para{" "}
-            <span className="text-gradient">arrasar na faculdade</span>
-          </h2>
-          <p className="mt-4 text-lg text-zinc-600">
-            Oferecemos consultoria completa em todas as etapas da sua vida
-            acadêmica, com mentores especializados em mais de 80 cursos.
-          </p>
-        </div>
+        <SectionHeader
+          label="Consultoria humana"
+          title={
+            <>
+              Mentoria especializada para{" "}
+              <span className="text-gradient">entregas que importam</span>
+            </>
+          }
+          description="Preços a partir de R$ 22. TCC por etapa com orçamento gratuito."
+        />
 
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => {
             const Icon = service.icon;
             return (
               <div
                 key={service.id}
-                className={`group relative rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                className={`group relative rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
                   service.highlight
-                    ? "border-primary-200 bg-gradient-to-br from-primary-50 to-white shadow-lg shadow-primary-500/5"
-                    : "border-surface-200 bg-white hover:border-primary-200 hover:shadow-primary-500/5"
+                    ? "border-primary-200 bg-gradient-to-br from-primary-50/60 to-white shadow-sm"
+                    : "card-premium hover:border-primary-200/80"
                 }`}
               >
                 {service.highlight && (
@@ -48,9 +46,18 @@ export default function Services() {
                   <Icon size={22} />
                 </div>
 
-                <h3 className="font-display text-lg font-bold text-surface-900">
-                  {service.title}
-                </h3>
+                <div className="mt-3 flex items-baseline justify-between gap-2">
+                  <h3 className="font-display text-lg font-bold text-surface-900">
+                    {service.title}
+                  </h3>
+                  {(service.priceFrom || service.priceNote) && (
+                    <span className="shrink-0 rounded-lg bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-700">
+                      {service.priceFrom
+                        ? `a partir de ${service.priceFrom}`
+                        : service.priceNote}
+                    </span>
+                  )}
+                </div>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-600">
                   {service.description}
                 </p>
@@ -71,10 +78,10 @@ export default function Services() {
                 </ul>
 
                 <Link
-                  href="#contato"
+                  href="#planos"
                   className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary-600 transition-colors hover:text-primary-700"
                 >
-                  Solicitar orçamento
+                  Ver valores
                   <ArrowUpRight
                     size={14}
                     className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

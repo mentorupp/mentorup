@@ -3,33 +3,27 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { faqItems } from "@/lib/data";
+import SectionHeader from "./SectionHeader";
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="section-padding bg-surface-50">
+    <section id="faq" className="section-padding border-t border-zinc-200/60 bg-white">
       <div className="container-custom">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-sm font-semibold tracking-wider text-primary-600 uppercase">
-            Perguntas Frequentes
-          </span>
-          <h2 className="font-display mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Tire suas <span className="text-gradient">dúvidas</span>
-          </h2>
-          <p className="mt-4 text-lg text-zinc-600">
-            Reunimos as perguntas mais comuns dos nossos alunos. Não encontrou
-            o que procura? Fale conosco!
-          </p>
-        </div>
+        <SectionHeader
+          label="FAQ"
+          title={<>Perguntas frequentes</>}
+          description="Tudo que você precisa saber antes de começar."
+        />
 
-        <div className="mx-auto mt-12 max-w-3xl space-y-3">
+        <div className="mx-auto max-w-2xl space-y-2">
           {faqItems.map((item, index) => {
             const isOpen = openIndex === index;
             return (
               <div
                 key={item.question}
-                className="overflow-hidden rounded-2xl border border-surface-200 bg-white transition-colors hover:border-primary-200"
+                className="card-premium overflow-hidden transition-colors hover:border-primary-200/80"
               >
                 <button
                   type="button"

@@ -7,7 +7,9 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
+import LogoBar from "@/components/LogoBar";
 import Pricing from "@/components/Pricing";
+import Services from "@/components/Services";
 import Testimonials from "@/components/Testimonials";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -17,8 +19,10 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
+        <LogoBar />
         <Features />
         <HowItWorks />
+        <Services />
         <About />
         <Testimonials />
         <Pricing />

@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { useState } from "react";
 import { testimonials } from "@/lib/data";
+import SectionHeader from "./SectionHeader";
 
 export default function Testimonials() {
   const [active, setActive] = useState(0);
@@ -12,24 +13,21 @@ export default function Testimonials() {
     setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
   return (
-    <section id="depoimentos" className="section-padding bg-surface-50">
+    <section id="depoimentos" className="section-padding border-t border-zinc-200/60 bg-white">
       <div className="container-custom">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-sm font-semibold tracking-wider text-primary-600 uppercase">
-            Depoimentos
-          </span>
-          <h2 className="font-display mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            O que nossos{" "}
-            <span className="text-gradient">alunos dizem</span>
-          </h2>
-          <p className="mt-4 text-lg text-zinc-600">
-            Histórias reais de estudantes que conquistaram suas metas com a
-            MentorUp.
-          </p>
-        </div>
+        <SectionHeader
+          label="Depoimentos"
+          title={
+            <>
+              Aprovado por quem{" "}
+              <span className="text-gradient">usa todo dia</span>
+            </>
+          }
+          description="Histórias reais de estudantes em universidades de todo o Brasil."
+        />
 
-        <div className="relative mx-auto mt-16 max-w-4xl">
-          <div className="overflow-hidden rounded-3xl border border-surface-200 bg-white p-8 shadow-xl shadow-primary-500/5 sm:p-10">
+        <div className="relative mx-auto max-w-3xl">
+          <div className="card-premium overflow-hidden p-6 sm:p-8">
             <Quote
               size={40}
               className="text-primary-200"
@@ -107,7 +105,7 @@ export default function Testimonials() {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.slice(0, 3).map((t) => (
             <div
               key={t.id}

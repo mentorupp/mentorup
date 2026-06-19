@@ -1,7 +1,7 @@
 import {
   ArrowRight,
   CheckCircle2,
-  Play,
+  Sparkles,
   Star,
 } from "lucide-react";
 import Link from "next/link";
@@ -9,167 +9,136 @@ import { stats } from "@/lib/data";
 
 export default function Hero() {
   return (
-    <section
-      id="inicio"
-      className="relative overflow-hidden pt-24 pb-16 lg:pt-32 lg:pb-24"
-    >
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-primary-200/40 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-accent-200/30 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-100/20 blur-3xl" />
-      </div>
+    <section id="inicio" className="relative overflow-hidden pt-[4.5rem] pb-10 lg:pt-24 lg:pb-14">
+      <div className="pointer-events-none absolute inset-0 mesh-bg" />
+      <div className="pointer-events-none absolute inset-0 grid-bg opacity-60" />
 
       <div className="container-custom relative px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
           <div className="animate-fade-up">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-1.5 text-sm font-medium text-primary-700">
-              <Star size={14} className="fill-primary-500 text-primary-500" />
-              Plataforma acadêmica com IA · 15 créditos grátis
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary-200/70 bg-white/80 px-3.5 py-1.5 text-xs font-medium text-primary-700 shadow-sm backdrop-blur-sm">
+              <Sparkles size={13} className="text-primary-500" />
+              15 créditos grátis · Referências ABNT ilimitadas
             </div>
 
-            <h1 className="font-display text-4xl leading-tight font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-              Estude smarter com{" "}
-              <span className="text-gradient">IA + consultoria</span>
+            <h1 className="font-display max-w-xl text-[2.35rem] leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[3.25rem]">
+              A plataforma acadêmica que{" "}
+              <span className="text-gradient">transforma seu estudo</span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-600">
-              Mapas mentais, questões de PDF, flashcards, referências ABNT e
-              ferramentas por área — tudo em uma plataforma. Consultoria humana
-              para TCC, estágio e monografia quando precisar.
+            <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-zinc-500 sm:text-base">
+              Mapas mentais, questões de PDF, flashcards e ferramentas por área —
+              com IA de verdade. Consultoria humana para TCC e monografia quando
+              você precisar ir além.
             </p>
 
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-7 py-3.5 text-base font-semibold text-white shadow-xl shadow-primary-500/25 transition-all hover:shadow-2xl hover:shadow-primary-500/30 hover:brightness-110"
-              >
-                Criar conta grátis
-                <ArrowRight size={18} />
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link href="/register" className="btn-primary px-7 py-3.5 text-[15px]">
+                Começar grátis
+                <ArrowRight size={17} />
               </Link>
-              <Link
-                href="#ferramentas"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-surface-200 bg-white px-7 py-3.5 text-base font-semibold text-surface-800 transition-all hover:border-primary-200 hover:bg-primary-50"
-              >
-                <Play size={18} className="text-primary-600" />
-                Ver serviços
+              <Link href="#ferramentas" className="btn-secondary px-7 py-3.5 text-[15px]">
+                Ver ferramentas
               </Link>
             </div>
 
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
-              {[
-                "Originalidade garantida",
-                "Mentores especialistas",
-                "Suporte 7 dias/semana",
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-2 text-sm text-zinc-600">
-                  <CheckCircle2 size={16} className="text-accent-500" />
-                  {item}
-                </div>
-              ))}
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
+              {["Sem cartão de crédito", "ABNT grátis", "8 áreas do conhecimento"].map(
+                (item) => (
+                  <span
+                    key={item}
+                    className="flex items-center gap-1.5 text-xs font-medium text-zinc-500"
+                  >
+                    <CheckCircle2 size={14} className="text-accent-500" />
+                    {item}
+                  </span>
+                )
+              )}
             </div>
           </div>
 
-          <div className="relative hidden lg:block">
-            <div className="animate-float relative mx-auto w-full max-w-md">
-              <div className="rounded-3xl border border-white/60 bg-white/80 p-8 shadow-2xl shadow-primary-500/10 backdrop-blur-sm">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 text-lg font-bold text-white">
+          <div className="relative mx-auto hidden w-full max-w-[420px] lg:block">
+            <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary-500/20 via-transparent to-accent-500/15 blur-2xl" />
+            <div className="animate-float relative card-premium overflow-hidden p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 text-sm font-bold text-white">
                     M
                   </div>
                   <div>
-                    <p className="font-display font-bold text-surface-900">
-                      MentorUp
-                    </p>
-                    <p className="text-sm text-zinc-500">
-                      Consultoria Acadêmica
-                    </p>
+                    <p className="font-display text-sm font-bold">Painel MentorUp</p>
+                    <p className="text-xs text-zinc-400">Engenharia Civil · 12 créditos</p>
                   </div>
                 </div>
+                <span className="rounded-full bg-accent-50 px-2.5 py-1 text-[10px] font-bold text-accent-600">
+                  PRO
+                </span>
+              </div>
 
-                <div className="space-y-4">
-                  {[
-                    { label: "TCC — Metodologia", progress: 85, color: "bg-primary-500" },
-                    { label: "Revisão ABNT", progress: 100, color: "bg-accent-500" },
-                    { label: "Slides — Defesa", progress: 60, color: "bg-primary-400" },
-                  ].map((item) => (
-                    <div key={item.label}>
-                      <div className="mb-1.5 flex justify-between text-sm">
-                        <span className="font-medium text-surface-800">
-                          {item.label}
-                        </span>
-                        <span className="text-zinc-500">{item.progress}%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-surface-100">
-                        <div
-                          className={`h-full rounded-full ${item.color} transition-all`}
-                          style={{ width: `${item.progress}%` }}
-                        />
-                      </div>
+              <div className="space-y-3.5">
+                {[
+                  { label: "Mapa Mental — Termodinâmica", pct: 100, c: "bg-accent-500" },
+                  { label: "Questões PDF — Cap. 4", pct: 72, c: "bg-primary-500" },
+                  { label: "Referências ABNT", pct: 100, c: "bg-primary-400" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-xl bg-surface-50 p-3">
+                    <div className="mb-1.5 flex justify-between text-xs">
+                      <span className="font-medium text-zinc-700">{item.label}</span>
+                      <span className="text-zinc-400">{item.pct}%</span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200/80">
+                      <div className={`h-full rounded-full ${item.c}`} style={{ width: `${item.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {[
+                  { v: "3", l: "Mapas" },
+                  { v: "12", l: "Questões" },
+                  { v: "∞", l: "ABNT" },
+                ].map((s) => (
+                  <div key={s.l} className="rounded-lg bg-primary-50/80 py-2 text-center">
+                    <p className="font-display text-lg font-bold text-primary-600">{s.v}</p>
+                    <p className="text-[10px] text-zinc-500">{s.l}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="absolute -top-3 -right-3 card-premium px-3 py-2 shadow-lg">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-1">
+                  {["A", "B", "C"].map((l) => (
+                    <div
+                      key={l}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-500 text-[9px] font-bold text-white ring-2 ring-white"
+                    >
+                      {l}
                     </div>
                   ))}
                 </div>
-
-                <div className="mt-6 flex items-center justify-between rounded-2xl bg-primary-50 p-4">
-                  <div>
-                    <p className="text-xs font-medium text-primary-600 uppercase tracking-wider">
-                      Próxima entrega
-                    </p>
-                    <p className="font-display text-lg font-bold text-surface-900">
-                      Capítulo 3 — Resultados
-                    </p>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-600 text-white">
-                    <CheckCircle2 size={20} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -top-4 -right-4 rounded-2xl border border-white/60 bg-white/90 px-4 py-3 shadow-lg backdrop-blur-sm">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-1">
-                    {["CR", "RM", "JF"].map((initials) => (
-                      <div
-                        key={initials}
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-[10px] font-bold text-white ring-2 ring-white"
-                      >
-                        {initials}
-                      </div>
+                <div>
+                  <p className="text-[11px] font-semibold">+2.500 alunos</p>
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={9} className="fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-surface-900">
-                      +2.500 alunos
-                    </p>
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={10}
-                          className="fill-amber-400 text-amber-400"
-                        />
-                      ))}
-                    </div>
-                  </div>
                 </div>
-              </div>
-
-              <div className="absolute -bottom-4 -left-4 rounded-2xl border border-accent-200 bg-accent-50 px-4 py-3 shadow-lg">
-                <p className="text-2xl font-bold text-accent-600">98%</p>
-                <p className="text-xs font-medium text-accent-700">
-                  Taxa de aprovação
-                </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 gap-6 border-t border-surface-200 pt-12 sm:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-4 rounded-2xl border border-zinc-200/80 bg-white/70 p-5 backdrop-blur-sm sm:grid-cols-4 lg:mt-12 lg:p-6">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center sm:text-left">
-              <p className="font-display text-3xl font-extrabold text-gradient lg:text-4xl">
+              <p className="font-display text-2xl font-extrabold text-gradient lg:text-3xl">
                 {stat.value}
               </p>
-              <p className="mt-1 text-sm text-zinc-500">{stat.label}</p>
+              <p className="mt-0.5 text-xs text-zinc-500">{stat.label}</p>
             </div>
           ))}
         </div>

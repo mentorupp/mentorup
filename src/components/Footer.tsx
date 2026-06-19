@@ -14,9 +14,9 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-surface-200 bg-surface-950 text-zinc-400">
-      <div className="container-custom section-padding !py-16">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="border-t border-zinc-800 bg-surface-950 text-zinc-400">
+      <div className="container-custom px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="#inicio" className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-accent-500">
@@ -123,7 +123,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-surface-800 pt-8 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-surface-800 pt-6 sm:flex-row">
           <p className="text-sm">
             &copy; {currentYear} MentorUp. Todos os direitos reservados.
           </p>

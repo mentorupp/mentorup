@@ -23,6 +23,8 @@ export interface Service {
   icon: LucideIcon;
   features: string[];
   highlight?: boolean;
+  priceFrom?: string;
+  priceNote?: string;
 }
 
 export interface Testimonial {
@@ -36,7 +38,7 @@ export interface Testimonial {
   avatar: string;
 }
 
-export interface PricingPlan {
+export interface PlatformPlan {
   id: string;
   name: string;
   description: string;
@@ -45,6 +47,24 @@ export interface PricingPlan {
   features: string[];
   popular?: boolean;
   cta: string;
+  href: string;
+}
+
+export interface ServicePrice {
+  id: string;
+  name: string;
+  price: number | null;
+  category: "rapido" | "entrega" | "projeto" | "tcc";
+}
+
+export interface ConsultancyPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  originalPrice: string;
+  includes: string[];
+  popular?: boolean;
 }
 
 export interface FAQItem {
@@ -83,10 +103,12 @@ export const services: Service[] = [
       "Preparação para banca",
     ],
     highlight: true,
+    priceNote: "Por etapa — orçamento grátis",
   },
   {
     id: "estagio",
     title: "Relatório de Estágio",
+    priceFrom: "R$ 98",
     description:
       "Relatórios profissionais que impressionam supervisores e coordenadores. Narrativa clara e reflexão acadêmica sólida.",
     icon: Briefcase,
@@ -101,6 +123,7 @@ export const services: Service[] = [
   {
     id: "relatorios",
     title: "Relatórios Acadêmicos",
+    priceFrom: "R$ 76",
     description:
       "Relatórios técnicos, de laboratório, de campo e seminários com linguagem precisa e fundamentação adequada.",
     icon: FileText,
@@ -115,6 +138,7 @@ export const services: Service[] = [
   {
     id: "atividades",
     title: "Atividades & Trabalhos",
+    priceFrom: "R$ 28",
     description:
       "Resolução orientada de listas, estudos de caso, mapas mentais e trabalhos em grupo com foco no aprendizado.",
     icon: ClipboardList,
@@ -129,6 +153,7 @@ export const services: Service[] = [
   {
     id: "artigos",
     title: "Artigos Científicos",
+    priceFrom: "R$ 164",
     description:
       "Produção e revisão de artigos para publicação em periódicos, com rigor metodológico e linguagem acadêmica.",
     icon: Microscope,
@@ -143,6 +168,7 @@ export const services: Service[] = [
   {
     id: "slides",
     title: "Apresentações & Slides",
+    priceFrom: "R$ 39",
     description:
       "Slides profissionais para seminários, defesas e congressos. Design limpo e narrativa persuasiva.",
     icon: Presentation,
@@ -157,6 +183,7 @@ export const services: Service[] = [
   {
     id: "revisao",
     title: "Revisão & Normatização",
+    priceFrom: "R$ 43",
     description:
       "Revisão ortográfica, coesão, coerência e adequação às normas ABNT, Vancouver ou APA conforme exigência.",
     icon: PenLine,
@@ -171,6 +198,7 @@ export const services: Service[] = [
   {
     id: "pesquisa",
     title: "Projetos de Pesquisa",
+    priceFrom: "R$ 197",
     description:
       "Elaboração de projetos para iniciação científica, mestrado e editais com metodologia robusta.",
     icon: Lightbulb,
@@ -185,6 +213,7 @@ export const services: Service[] = [
   {
     id: "fichamento",
     title: "Fichamentos & Resenhas",
+    priceFrom: "R$ 28",
     description:
       "Análise crítica de obras acadêmicas com síntese precisa e reflexão aprofundada sobre o conteúdo.",
     icon: BookOpen,
@@ -299,64 +328,122 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
-export const pricingPlans: PricingPlan[] = [
+export const platformPlans: PlatformPlan[] = [
   {
-    id: "basico",
-    name: "Essencial",
-    description: "Ideal para trabalhos pontuais e entregas rápidas",
-    price: "R$ 97",
-    period: "a partir de",
+    id: "free",
+    name: "Grátis",
+    description: "Ferramentas IA para o dia a dia",
+    price: "R$ 0",
+    period: "para sempre",
     features: [
-      "Atividades e listas de exercícios",
-      "Resumos e fichamentos",
-      "Revisão ortográfica básica",
-      "Suporte por e-mail",
-      "Entrega em até 5 dias úteis",
-      "1 revisão inclusa",
+      "15 créditos/mês",
+      "Referências ABNT ilimitadas",
+      "Mapas mentais, flashcards e resumos",
+      "Histórico básico",
     ],
-    cta: "Solicitar orçamento",
+    cta: "Criar conta grátis",
+    href: "/register",
   },
   {
-    id: "profissional",
-    name: "Profissional",
-    description: "O mais escolhido por graduandos",
-    price: "R$ 297",
-    period: "a partir de",
+    id: "student",
+    name: "Estudante",
+    description: "Para quem usa IA toda semana",
+    price: "R$ 29",
+    period: "/mês",
     features: [
-      "Relatórios e seminários completos",
-      "Relatório de estágio",
-      "Formatação ABNT completa",
-      "Mentor dedicado da sua área",
-      "Suporte WhatsApp prioritário",
-      "Entrega em até 10 dias úteis",
-      "3 revisões inclusas",
-      "Garantia de originalidade",
+      "150 créditos/mês",
+      "Todas as ferramentas por área",
+      "Simulador de prova",
+      "Exportação de mapas e flashcards",
+      "Suporte prioritário",
     ],
     popular: true,
-    cta: "Começar agora",
+    cta: "Começar no Estudante",
+    href: "/register",
   },
   {
-    id: "premium",
-    name: "Premium",
-    description: "Acompanhamento completo do início ao fim",
-    price: "R$ 697",
-    period: "a partir de",
+    id: "pro",
+    name: "Pro",
+    description: "Uso intenso + desconto em consultoria",
+    price: "R$ 59",
+    period: "/mês",
     features: [
-      "TCC e monografias completas",
-      "Artigos científicos",
-      "Projetos de pesquisa",
-      "Mentor sênior exclusivo",
-      "Reuniões semanais online",
-      "Preparação para banca/defesa",
-      "Revisões ilimitadas",
-      "Suporte 24/7",
-      "Garantia de aprovação",
+      "Créditos IA generosos*",
+      "10% off em consultoria humana",
+      "Mentor dedicado (1h/mês)",
+      "Prioridade na fila",
+      "Tudo do plano Estudante",
     ],
-    cta: "Falar com consultor",
+    cta: "Assinar Pro",
+    href: "/register",
+  },
+];
+
+export const servicePrices: ServicePrice[] = [
+  { id: "resumo", name: "Resumo simples", price: 22, category: "rapido" },
+  { id: "fichamento", name: "Fichamento", price: 28, category: "rapido" },
+  { id: "lista", name: "Lista de exercícios", price: 28, category: "rapido" },
+  { id: "slides", name: "Apresentação em slides", price: 39, category: "rapido" },
+  { id: "atividade", name: "Atividade acadêmica", price: 43, category: "rapido" },
+  { id: "revisao", name: "Revisão ortográfica", price: 43, category: "rapido" },
+  { id: "abnt", name: "Formatação ABNT", price: 54, category: "entrega" },
+  { id: "relatorio", name: "Relatório acadêmico", price: 76, category: "entrega" },
+  { id: "estagio", name: "Relatório de estágio", price: 98, category: "entrega" },
+  { id: "extensao", name: "Projeto de extensão", price: 109, category: "projeto" },
+  { id: "artigo", name: "Artigo científico", price: 164, category: "projeto" },
+  { id: "pesquisa", name: "Projeto de pesquisa", price: 197, category: "projeto" },
+  { id: "tcc", name: "Orientação de TCC (por etapa)", price: null, category: "tcc" },
+];
+
+export const servicePriceCategories = {
+  rapido: "Entregas rápidas",
+  entrega: "Trabalhos completos",
+  projeto: "Projetos avançados",
+  tcc: "Graduação",
+} as const;
+
+export const consultancyPackages: ConsultancyPackage[] = [
+  {
+    id: "rapido",
+    name: "Pacote Rápido",
+    description: "Para semana de provas e leituras",
+    price: "R$ 45",
+    originalPrice: "R$ 50",
+    includes: ["Resumo simples", "Fichamento"],
+  },
+  {
+    id: "atividade",
+    name: "Pacote Atividade",
+    description: "Lista + entrega formatada",
+    price: "R$ 59",
+    originalPrice: "R$ 71",
+    includes: ["Lista de exercícios", "Atividade acadêmica"],
+    popular: true,
+  },
+  {
+    id: "estagio",
+    name: "Pacote Estágio",
+    description: "Relatório + apresentação oral",
+    price: "R$ 119",
+    originalPrice: "R$ 137",
+    includes: ["Relatório de estágio", "Apresentação em slides"],
+  },
+  {
+    id: "entrega",
+    name: "Pacote Entrega",
+    description: "Relatório pronto e normatizado",
+    price: "R$ 109",
+    originalPrice: "R$ 130",
+    includes: ["Relatório acadêmico", "Formatação ABNT"],
   },
 ];
 
 export const faqItems: FAQItem[] = [
+  {
+    question: "Por que os preços são mais baixos que outras consultorias?",
+    answer:
+      "Somos feitos por e para estudantes. Cobramos por entrega, com valores fixos e pacotes acessíveis — não vendemos planos de R$ 500+. Você paga só o que precisa, quando precisa.",
+  },
   {
     question: "O trabalho entregue é original e livre de plágio?",
     answer:
@@ -365,12 +452,12 @@ export const faqItems: FAQItem[] = [
   {
     question: "Posso acompanhar o andamento do meu trabalho?",
     answer:
-      "Com certeza. Você tem acesso a um painel de acompanhamento e pode conversar diretamente com seu mentor via WhatsApp ou e-mail. Nos planos Premium, realizamos reuniões semanais por videoconferência.",
+      "Sim. Você acompanha pelo painel e fala direto com seu mentor via WhatsApp ou e-mail. Projetos maiores (TCC, artigos) incluem checkpoints por etapa.",
   },
   {
     question: "E se eu precisar de revisões após a entrega?",
     answer:
-      "Cada plano inclui um número de revisões gratuitas. Caso precise de alterações adicionais, nossa equipe avalia e, na maioria dos casos, ajustes menores são feitos sem custo extra dentro do prazo acordado.",
+      "Cada serviço inclui 1 revisão gratuita dentro do escopo acordado. Ajustes menores costumam ser resolvidos sem custo extra dentro de 7 dias após a entrega.",
   },
   {
     question: "Vocês atendem todas as áreas do conhecimento?",
@@ -380,7 +467,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "Como funciona o pagamento?",
     answer:
-      "Aceitamos PIX, cartão de crédito (parcelado em até 12x), boleto bancário e transferência. Para projetos maiores, oferecemos pagamento em etapas conforme o cronograma de entrega.",
+      "PIX à vista (com desconto), cartão em até 6x sem juros nos pacotes, e parcelamento por etapa em TCC e projetos longos. Valores fixos na tabela — sem surpresas na hora de pagar.",
   },
   {
     question: "Qual o prazo mínimo de entrega?",
@@ -390,7 +477,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "Vocês ajudam na defesa oral do TCC?",
     answer:
-      "Sim! Nos planos Profissional e Premium incluímos preparação para apresentação oral: roteiro, slides, simulação de perguntas da banca e dicas de postura e argumentação.",
+      "Sim. Oferecemos slides de defesa (R$ 39), roteiro de apresentação e simulação de perguntas da banca. No acompanhamento por etapa do TCC, a preparação oral pode ser incluída no orçamento.",
   },
   {
     question: "Meus dados e informações ficam seguros?",

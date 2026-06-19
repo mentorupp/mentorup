@@ -1,102 +1,96 @@
 import Link from "next/link";
 import { tools } from "@/lib/tools-config";
-import {
-  ArrowRight,
-  Brain,
-  GitBranch,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, Brain, GitBranch, Sparkles, Zap } from "lucide-react";
+import SectionHeader from "./SectionHeader";
 
 const highlights = [
   {
     icon: GitBranch,
     title: "Mapa Mental IA",
-    description: "PDF ou texto → mapa interativo com nós expandíveis e modo prova.",
+    description: "Transforme PDFs em mapas interativos com nós expandíveis.",
+    className: "sm:col-span-2 lg:row-span-1",
+    featured: true,
   },
   {
     icon: Brain,
     title: "Questões sobre PDF",
-    description: "Gere provas com gabarito comentado a partir do seu material.",
+    description: "Provas com gabarito comentado do seu material.",
+    className: "",
   },
   {
     icon: Sparkles,
-    title: "Referências ABNT Grátis",
-    description: "Gere referências bibliográficas corretas sem gastar créditos.",
+    title: "Referências ABNT",
+    description: "Ilimitadas e gratuitas — sempre.",
+    className: "",
   },
   {
     icon: Zap,
     title: "8 Áreas do Conhecimento",
-    description: "Ferramentas especializadas para saúde, engenharia, direito e mais.",
+    description: "Saúde, engenharia, direito, humanas e mais.",
+    className: "sm:col-span-2",
   },
 ];
 
 export default function Features() {
-  const coreTools = tools.filter((t) => t.category === "core").slice(0, 8);
+  const coreTools = tools.filter((t) => t.category === "core");
 
   return (
-    <section id="ferramentas" className="section-padding bg-white">
+    <section id="ferramentas" className="section-padding border-t border-zinc-200/60 bg-white">
       <div className="container-custom">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-sm font-semibold tracking-wider text-primary-600 uppercase">
-            Plataforma IA
-          </span>
-          <h2 className="font-display mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Ferramentas que{" "}
-            <span className="text-gradient">transformam seu estudo</span>
-          </h2>
-          <p className="mt-4 text-lg text-zinc-600">
-            Teste grátis com 15 créditos mensais. Referências ABNT ilimitadas.
-          </p>
-        </div>
+        <SectionHeader
+          label="Plataforma IA"
+          title={
+            <>
+              Tudo para estudar e produzir{" "}
+              <span className="text-gradient">em um só lugar</span>
+            </>
+          }
+          description="15 créditos mensais grátis. Sem cartão. Comece em segundos."
+        />
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {highlights.map((item) => {
             const Icon = item.icon;
             return (
               <div
                 key={item.title}
-                className="rounded-2xl border border-surface-200 p-5 transition hover:border-primary-200 hover:shadow-lg"
+                className={`card-premium group p-5 transition hover:border-primary-200/80 hover:shadow-md ${item.className} ${item.featured ? "bg-gradient-to-br from-primary-50/50 to-white" : ""}`}
               >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
-                  <Icon size={20} />
+                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 text-primary-600 transition group-hover:bg-primary-600 group-hover:text-white">
+                  <Icon size={18} />
                 </div>
-                <h3 className="font-display font-bold">{item.title}</h3>
-                <p className="mt-1 text-sm text-zinc-500">{item.description}</p>
+                <h3 className="font-display text-base font-bold">{item.title}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-500">{item.description}</p>
               </div>
             );
           })}
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-5">
           {coreTools.map((tool) => {
             const Icon = tool.icon;
             return (
               <Link
                 key={tool.id}
                 href="/register"
-                className="group flex items-center gap-3 rounded-xl border border-surface-200 p-4 transition hover:border-primary-200 hover:bg-primary-50/50"
+                className="group flex items-center gap-2.5 rounded-xl border border-zinc-200/80 bg-surface-50/50 px-3 py-2.5 transition hover:border-primary-200 hover:bg-white hover:shadow-sm"
               >
-                <Icon size={18} className="text-primary-600" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-surface-900">{tool.name}</p>
-                  <p className="text-xs text-zinc-500">
+                <Icon size={15} className="shrink-0 text-primary-600" />
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-semibold text-zinc-800">{tool.name}</p>
+                  <p className="text-[10px] text-zinc-400">
                     {tool.freeUnlimited ? "Grátis" : `${tool.credits} cr`}
                   </p>
                 </div>
-                <ArrowRight size={14} className="text-zinc-300 transition group-hover:text-primary-600" />
               </Link>
             );
           })}
         </div>
 
-        <div className="mt-10 text-center">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-8 py-3.5 text-base font-semibold text-white shadow-xl shadow-primary-500/25 transition hover:brightness-110"
-          >
-            Criar conta grátis — 15 créditos
-            <ArrowRight size={18} />
+        <div className="mt-8 text-center">
+          <Link href="/register" className="btn-primary">
+            Criar conta grátis
+            <ArrowRight size={16} />
           </Link>
         </div>
       </div>
