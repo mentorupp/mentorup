@@ -4,6 +4,7 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import type { Provider } from "next-auth/providers";
+import { authConfig } from "./auth.config";
 import { prisma } from "./prisma";
 import { PLAN_CREDITS } from "./tools-config";
 
@@ -51,15 +52,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
-  trustHost: true,
-  pages: {
-    signIn: "/login",
-    newUser: "/dashboard",
-  },
   providers,
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ token, user, trigger, session }) {
       if (user) token.id = user.id!;
 
