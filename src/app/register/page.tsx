@@ -45,7 +45,10 @@ export default function RegisterPage() {
       });
 
       if (result?.error) {
-        router.push("/login");
+        setError(
+          "Conta criada! Faça login com seu e-mail e senha. Se o erro persistir, confira AUTH_SECRET na Vercel."
+        );
+        setTimeout(() => router.push("/login"), 2500);
       } else {
         router.push("/dashboard");
       }

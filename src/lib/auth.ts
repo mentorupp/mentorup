@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import type { Provider } from "next-auth/providers";
 import { authConfig } from "./auth.config";
@@ -53,7 +52,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
   providers,
   callbacks: {
     ...authConfig.callbacks,
@@ -80,7 +78,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.name = dbUser.name;
           }
         } catch {
-          /* DB not connected yet */
+          /* DB not connected */
         }
       }
 
@@ -113,7 +111,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             data: { credits: PLAN_CREDITS.FREE },
           });
         } catch {
-          /* DB not connected yet */
+          /* ignore */
         }
       }
     },

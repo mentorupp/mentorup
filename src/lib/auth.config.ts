@@ -5,9 +5,11 @@ import type { NextAuthConfig } from "next-auth";
  * Providers reais ficam em auth.ts
  */
 export const authConfig = {
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
     newUser: "/dashboard",
+    error: "/login",
   },
   session: { strategy: "jwt" },
   trustHost: true,
