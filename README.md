@@ -34,9 +34,10 @@ Acesse [http://localhost:3000](http://localhost:3000).
 ## Deploy na Vercel
 
 1. Faça push do repositório para o GitHub
-2. Acesse [vercel.com](https://vercel.com) e importe o repositório
-3. A Vercel detecta automaticamente o Next.js — nenhuma configuração extra necessária
-4. Clique em **Deploy**
+2. Acesse [vercel.com](https://vercel.com) e importe o repositório `mentorupp/mentorup`
+3. **Root Directory:** deixe vazio (`.`). Não use `mentorup` — os arquivos estão na raiz do repo
+4. Framework: **Next.js** (detectado automaticamente)
+5. Clique em **Deploy**
 
 ### Variáveis de ambiente (opcional)
 
