@@ -1,11 +1,13 @@
 import type { NextAuthConfig } from "next-auth";
+import { getAuthSecret, getAuthUrl } from "./auth-secret";
 
 /**
  * Config leve para Edge Middleware (sem Prisma/bcrypt).
  * Providers reais ficam em auth.ts
  */
 export const authConfig = {
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: getAuthSecret(),
+  ...(getAuthUrl() ? { url: getAuthUrl() } : {}),
   pages: {
     signIn: "/login",
     newUser: "/dashboard",
