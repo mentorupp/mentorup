@@ -21,14 +21,14 @@ export default function CTA() {
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
-                href="#contato"
+                href="/register"
                 className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-primary-600 shadow-xl transition-all hover:shadow-2xl hover:brightness-105"
               >
-                Solicitar orçamento grátis
+                Criar conta grátis — 15 créditos
                 <ArrowRight size={18} />
               </Link>
               <Link
-                href={`https://wa.me/5511999998888?text=Olá! Quero saber mais sobre a MentorUp.`}
+                href="https://wa.me/5511999998888?text=Olá! Quero saber mais sobre a MentorUp."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-xl border-2 border-white/30 px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-white/10"

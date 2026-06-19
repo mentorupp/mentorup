@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
 import "./globals.css";
-import WhatsAppButton from "@/components/WhatsAppButton";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -16,53 +16,34 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MentorUp — Consultoria Acadêmica de Excelência",
+  title: "MentorUp — Plataforma Acadêmica com IA",
   description:
-    "Consultoria acadêmica completa: TCC, monografia, estágio, relatórios, artigos científicos, revisão ABNT e muito mais. Mentores especialistas, originalidade garantida.",
+    "Mapas mentais, questões de PDF, flashcards, referências ABNT, ferramentas por área e consultoria acadêmica. Tudo para sua jornada universitária.",
   keywords: [
     "consultoria acadêmica",
+    "IA para estudantes",
+    "mapa mental",
     "TCC",
-    "monografia",
-    "relatório de estágio",
     "ABNT",
-    "mentoria acadêmica",
-    "artigo científico",
     "MentorUp",
   ],
-  authors: [{ name: "MentorUp" }],
   openGraph: {
-    title: "MentorUp — Consultoria Acadêmica de Excelência",
-    description:
-      "TCC, estágio, relatórios e muito mais. Mentoria de excelência para sua jornada acadêmica.",
+    title: "MentorUp — Plataforma Acadêmica com IA",
+    description: "Ferramentas de IA + consultoria acadêmica para estudantes universitários.",
     type: "website",
     locale: "pt_BR",
     siteName: "MentorUp",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "MentorUp — Consultoria Acadêmica",
-    description:
-      "Consultoria acadêmica completa com mentores especialistas.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  icons: {
-    icon: "/favicon.svg",
-  },
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${plusJakarta.variable}`}>
-      <body className="font-sans">
-        {children}
-        <WhatsAppButton />
+      <body className="font-sans antialiased">
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

@@ -24,30 +24,30 @@ export default function Hero() {
           <div className="animate-fade-up">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-1.5 text-sm font-medium text-primary-700">
               <Star size={14} className="fill-primary-500 text-primary-500" />
-              Consultoria acadêmica #1 do Brasil
+              Plataforma acadêmica com IA · 15 créditos grátis
             </div>
 
             <h1 className="font-display text-4xl leading-tight font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-              Sua jornada acadêmica com{" "}
-              <span className="text-gradient">mentoria de excelência</span>
+              Estude smarter com{" "}
+              <span className="text-gradient">IA + consultoria</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-600">
-              TCC, estágio, relatórios, artigos e muito mais. A MentorUp
-              conecta você a especialistas que transformam desafios acadêmicos
-              em conquistas — com qualidade, prazo e total originalidade.
+              Mapas mentais, questões de PDF, flashcards, referências ABNT e
+              ferramentas por área — tudo em uma plataforma. Consultoria humana
+              para TCC, estágio e monografia quando precisar.
             </p>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
               <Link
-                href="#contato"
+                href="/register"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-7 py-3.5 text-base font-semibold text-white shadow-xl shadow-primary-500/25 transition-all hover:shadow-2xl hover:shadow-primary-500/30 hover:brightness-110"
               >
-                Começar agora
+                Criar conta grátis
                 <ArrowRight size={18} />
               </Link>
               <Link
-                href="#servicos"
+                href="#ferramentas"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-surface-200 bg-white px-7 py-3.5 text-base font-semibold text-surface-800 transition-all hover:border-primary-200 hover:bg-primary-50"
               >
                 <Play size={18} className="text-primary-600" />

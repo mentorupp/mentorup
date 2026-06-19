@@ -54,10 +54,16 @@ export default function Header() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <Link
-            href="#contato"
-            className="rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/25 transition-all hover:shadow-xl hover:shadow-primary-500/30 hover:brightness-110"
+            href="/login"
+            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-surface-800 transition-colors hover:bg-surface-100"
           >
-            Solicitar Orçamento
+            Entrar
+          </Link>
+          <Link
+            href="/register"
+            className="rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/25 transition-all hover:brightness-110"
+          >
+            Começar Grátis
           </Link>
         </div>
 
@@ -85,11 +91,18 @@ export default function Header() {
               </Link>
             ))}
             <Link
-              href="#contato"
+              href="/login"
               onClick={() => setIsOpen(false)}
-              className="mt-4 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-4 py-3 text-center text-base font-semibold text-white"
+              className="rounded-xl px-4 py-3 text-center text-base font-semibold text-surface-800"
             >
-              Solicitar Orçamento
+              Entrar
+            </Link>
+            <Link
+              href="/register"
+              onClick={() => setIsOpen(false)}
+              className="rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-4 py-3 text-center text-base font-semibold text-white"
+            >
+              Começar Grátis
             </Link>
           </nav>
         </div>

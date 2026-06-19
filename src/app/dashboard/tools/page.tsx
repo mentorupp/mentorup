@@ -1,0 +1,67 @@
+import Link from "next/link";
+import { tools } from "@/lib/tools-config";
+
+export default function ToolsPage() {
+  const core = tools.filter((t) => t.category === "core");
+  const premium = tools.filter((t) => t.category === "premium");
+
+  return (
+    <div>
+      <h1 className="font-display text-3xl font-extrabold text-surface-900">Ferramentas</h1>
+      <p className="mt-1 text-zinc-600">
+        Todas as ferramentas de IA para sua jornada acadêmica.
+      </p>
+
+      <h2 className="font-display mt-8 mb-4 text-lg font-bold">Essenciais</h2>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {core.map((tool) => {
+          const Icon = tool.icon;
+          return (
+            <Link
+              key={tool.id}
+              href={tool.href}
+              className="rounded-2xl border border-surface-200 bg-white p-5 transition hover:border-primary-200 hover:shadow-lg"
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+                  <Icon size={20} />
+                </div>
+                {tool.popular && (
+                  <span className="rounded-full bg-accent-50 px-2 py-0.5 text-[10px] font-bold text-accent-600 uppercase">
+                    Popular
+                  </span>
+                )}
+              </div>
+              <h3 className="font-display font-bold">{tool.name}</h3>
+              <p className="mt-1 text-sm text-zinc-500">{tool.description}</p>
+              <p className="mt-3 text-xs font-semibold text-primary-600">
+                {tool.freeUnlimited ? "Grátis ilimitado" : `${tool.credits} créditos/uso`}
+              </p>
+            </Link>
+          );
+        })}
+      </div>
+
+      <h2 className="font-display mt-10 mb-4 text-lg font-bold">Avançadas</h2>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {premium.map((tool) => {
+          const Icon = tool.icon;
+          return (
+            <Link
+              key={tool.id}
+              href={tool.href}
+              className="rounded-2xl border border-surface-200 bg-white p-5 transition hover:border-primary-200 hover:shadow-lg"
+            >
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                <Icon size={20} />
+              </div>
+              <h3 className="font-display font-bold">{tool.name}</h3>
+              <p className="mt-1 text-sm text-zinc-500">{tool.description}</p>
+              <p className="mt-3 text-xs font-semibold text-violet-600">{tool.credits} créditos/uso</p>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

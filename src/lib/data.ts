@@ -59,9 +59,9 @@ export interface Stat {
 
 export const navLinks = [
   { href: "#inicio", label: "Início" },
-  { href: "#servicos", label: "Serviços" },
+  { href: "#ferramentas", label: "Ferramentas IA" },
+  { href: "#servicos", label: "Consultoria" },
   { href: "#como-funciona", label: "Como Funciona" },
-  { href: "#sobre", label: "Sobre" },
   { href: "#depoimentos", label: "Depoimentos" },
   { href: "#planos", label: "Planos" },
   { href: "#faq", label: "FAQ" },
