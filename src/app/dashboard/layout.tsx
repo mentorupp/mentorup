@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Sidebar from "@/components/dashboard/Sidebar";
 
 export default function DashboardLayout({
@@ -13,7 +14,9 @@ export default function DashboardLayout({
       <main className="flex-1 overflow-y-auto">
         <div className="border-b border-surface-200 bg-white px-4 py-3 lg:hidden">
           <div className="flex items-center justify-between">
-            <span className="font-display font-bold">MentorUp</span>
+            <Link href="/dashboard" className="font-display font-bold">
+              MentorUp
+            </Link>
             <div className="flex gap-2 text-xs">
               <a href="/dashboard/tools" className="rounded-lg bg-primary-50 px-3 py-1.5 font-semibold text-primary-600">Ferramentas</a>
               <a href="/dashboard/areas" className="rounded-lg bg-surface-100 px-3 py-1.5 font-medium text-zinc-600">Áreas</a>
