@@ -36,13 +36,13 @@ export default function Hero() {
                 Começar grátis
                 <ArrowRight size={17} />
               </Link>
-              <Link href="/ferramentas" className="btn-secondary px-7 py-3.5 text-[15px]">
-                Ver ferramentas
+              <Link href="/planos" className="btn-secondary px-7 py-3.5 text-[15px]">
+                Ver planos — R$ 29/mês
               </Link>
             </div>
 
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-              {["Sem cartão de crédito", "ABNT grátis", "Saúde e Humanas"].map(
+              {["15 créditos grátis", "ABNT ilimitado", "Assine quando precisar"].map(
                 (item) => (
                   <span
                     key={item}

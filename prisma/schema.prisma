@@ -66,6 +66,8 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
+  cpf           String?   @unique
+  phone         String?   @unique
   emailVerified DateTime?
   password      String?
   image         String?
@@ -74,6 +76,8 @@ model User {
   university    String?
   credits       Int       @default(15)
   plan          Plan      @default(FREE)
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
   role          Role      @default(USER)
   adminNote     String?   @db.Text
   creditsReset  DateTime  @default(now())
@@ -177,6 +181,8 @@ model Order {
   plan        Plan?
   amountCents Int
   status      OrderStatus @default(PENDING)
+  stripeSessionId      String? @unique
+  stripeSubscriptionId String?
   adminNote   String?     @db.Text
   paidAt      DateTime?
   dueAt       DateTime?

@@ -76,7 +76,7 @@ export default async function DashboardPage() {
       <div className="mb-8 rounded-2xl bg-gradient-to-r from-primary-600 to-accent-500 p-6 text-white">
         <h2 className="font-display text-xl font-bold">Comece por aqui</h2>
         <p className="mt-1 text-primary-100">
-          Mapa mental, questões de PDF e referências ABNT — grátis para testar.
+          Mapa mental, questões de PDF e referências ABNT — teste grátis com seus 15 créditos.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
@@ -91,6 +91,14 @@ export default async function DashboardPage() {
           >
             Referências ABNT
           </Link>
+          {session?.user?.plan === "FREE" && (
+            <Link
+              href="/dashboard/billing"
+              className="rounded-xl border border-amber-300/50 bg-amber-400/20 px-4 py-2 text-sm font-semibold text-amber-50 transition hover:bg-amber-400/30"
+            >
+              Assinar — 150 créditos/mês
+            </Link>
+          )}
         </div>
       </div>
 

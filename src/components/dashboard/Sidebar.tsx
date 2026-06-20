@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   BookOpen,
   CreditCard,
+  Crown,
   GitBranch,
   History,
   Home,
@@ -45,25 +46,50 @@ export default function DashboardSidebar() {
         </Link>
       </div>
 
-      <div className="mx-4 mt-4 rounded-xl bg-gradient-to-br from-primary-50 to-accent-50 p-4">
+      <div
+        className={`mx-4 mt-4 rounded-xl p-4 ${
+          session?.user?.plan === "FREE"
+            ? "bg-gradient-to-br from-primary-600 to-violet-600 text-white"
+            : "bg-gradient-to-br from-primary-50 to-accent-50"
+        }`}
+      >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-primary-600 uppercase tracking-wider">
+          <span
+            className={`text-xs font-medium uppercase tracking-wider ${
+              session?.user?.plan === "FREE" ? "text-primary-100" : "text-primary-600"
+            }`}
+          >
             Créditos
           </span>
-          <Sparkles size={14} className="text-primary-500" />
+          <Sparkles size={14} className={session?.user?.plan === "FREE" ? "text-white" : "text-primary-500"} />
         </div>
-        <p className="font-display mt-1 text-2xl font-bold text-surface-900">
+        <p
+          className={`font-display mt-1 text-2xl font-bold ${
+            session?.user?.plan === "FREE" ? "text-white" : "text-surface-900"
+          }`}
+        >
           {session?.user?.credits ?? 15}
         </p>
-        <p className="text-xs text-zinc-500">
-          Plano {session?.user?.plan === "PRO" ? "Pro" : session?.user?.plan === "STUDENT" ? "Estudante" : "Grátis"}
+        <p className={`text-xs ${session?.user?.plan === "FREE" ? "text-primary-100" : "text-zinc-500"}`}>
+          Plano{" "}
+          {session?.user?.plan === "PRO" ? "Pro" : session?.user?.plan === "STUDENT" ? "Estudante" : "Grátis"}
         </p>
-        <Link
-          href="/dashboard/billing"
-          className="mt-2 block text-center text-xs font-semibold text-primary-600 hover:underline"
-        >
-          Obter mais créditos
-        </Link>
+        {session?.user?.plan === "FREE" ? (
+          <Link
+            href="/dashboard/billing"
+            className="mt-3 flex items-center justify-center gap-1.5 rounded-lg bg-white py-2 text-center text-xs font-bold text-primary-700 transition hover:brightness-105"
+          >
+            <Crown size={14} />
+            Assinar — a partir de R$ 29/mês
+          </Link>
+        ) : (
+          <Link
+            href="/dashboard/billing"
+            className="mt-2 block text-center text-xs font-semibold text-primary-600 hover:underline"
+          >
+            Gerenciar plano
+          </Link>
+        )}
       </div>
 
       <nav className="mt-4 flex-1 overflow-y-auto px-3">

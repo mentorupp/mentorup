@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Sidebar from "@/components/dashboard/Sidebar";
+import DashboardUpgradeBar from "@/components/dashboard/DashboardUpgradeBar";
 
 export default function DashboardLayout({
   children,
@@ -24,7 +25,10 @@ export default function DashboardLayout({
             </div>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl p-4 lg:p-8">{children}</div>
+        <div className="mx-auto max-w-6xl p-4 lg:p-8">
+          <DashboardUpgradeBar />
+          {children}
+        </div>
       </main>
     </div>
   );
