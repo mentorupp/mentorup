@@ -1,25 +1,24 @@
-import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 type LogoVariant = "color" | "white" | "icon";
 type LogoSize = "xs" | "sm" | "md" | "lg" | "xl";
 
+/** Arquivos PNG nativos em alta resolução — servidos sem recompressão do Next.js */
 const assets = {
-  color: "/brand/logo-full.png",
-  white: "/brand/logo-white.png",
-  icon: "/brand/logo-icon.png",
+  color: { src: "/brand/logo-full.png", width: 2400, height: 653 },
+  white: { src: "/brand/logo-white.png", width: 2400, height: 653 },
+  icon: { src: "/brand/logo-icon.png", width: 1200, height: 1079 },
 } as const;
 
-/** Proporção real da logo completa (ícone + wordmark) */
-const WORDMARK_RATIO = 3.68;
+const WORDMARK_RATIO = 2400 / 653;
 
 const heights: Record<LogoSize, number> = {
-  xs: 38,
-  sm: 46,
-  md: 54,
-  lg: 62,
-  xl: 74,
+  xs: 40,
+  sm: 48,
+  md: 56,
+  lg: 64,
+  xl: 80,
 };
 
 interface MentorUpLogoProps {
@@ -27,7 +26,6 @@ interface MentorUpLogoProps {
   size?: LogoSize;
   href?: string | null;
   className?: string;
-  priority?: boolean;
 }
 
 export default function MentorUpLogo({
@@ -35,22 +33,28 @@ export default function MentorUpLogo({
   size = "md",
   href = "/",
   className,
-  priority = false,
 }: MentorUpLogoProps) {
-  const height = heights[size];
-  const width =
-    variant === "icon" ? height : Math.round(height * WORDMARK_RATIO);
-  const src = assets[variant];
+  const displayHeight = heights[size];
+  const asset = assets[variant];
+  const displayWidth =
+    variant === "icon"
+      ? displayHeight
+      : Math.round(displayHeight * WORDMARK_RATIO);
 
   const image = (
-    <Image
-      src={src}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={asset.src}
       alt="MentorUp"
-      width={width}
-      height={height}
-      priority={priority}
-      className={cn("w-auto object-contain object-left", className)}
-      style={{ height, width: "auto", maxWidth: width }}
+      width={asset.width}
+      height={asset.height}
+      decoding="async"
+      className={cn("block h-auto max-w-none object-contain object-left", className)}
+      style={{
+        height: displayHeight,
+        width: displayWidth,
+        imageRendering: "auto",
+      }}
     />
   );
 
