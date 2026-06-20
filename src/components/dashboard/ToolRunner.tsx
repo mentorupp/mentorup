@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { getToolById } from "@/lib/tools-config";
 import { UPLOAD_FORMAT_HINT } from "@/lib/upload-formats";
@@ -28,8 +28,23 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
   const [demoNotice, setDemoNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
   const { data: session, update } = useSession();
   const router = useRouter();
+
+  const isInteractiveResult = ["mind-map", "pdf-quiz", "flashcards", "exam-sim", "defense-sim"].includes(
+    tool.id
+  );
+
+  const resultText =
+    typeof result === "string" ? result : result ? JSON.stringify(result, null, 2) : "";
+
+  const handleCopy = async () => {
+    if (!resultText) return;
+    await navigator.clipboard.writeText(resultText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleSubmit = async () => {
     if (input.trim().length < 10) {
@@ -168,12 +183,25 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
           <QuizViewer data={(result as { exam?: { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string }>> } }).exam ?? (result as { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string }>> })} />
         ) : null}
 
-        {result && !["mind-map", "pdf-quiz", "flashcards", "exam-sim", "defense-sim"].includes(tool.id) && (
-          <div className="prose prose-sm max-w-none prose-headings:font-display">
-            <ReactMarkdown>
-              {typeof result === "string" ? result : JSON.stringify(result, null, 2)}
-            </ReactMarkdown>
-          </div>
+        {result && !isInteractiveResult && (
+          <>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="text-xs font-medium text-accent-800">
+                Pronto para copiar e colar no Word (ABNT)
+              </p>
+              <button
+                type="button"
+                onClick={() => void handleCopy()}
+                className="flex items-center gap-1 rounded-lg border border-surface-200 px-2.5 py-1 text-xs font-semibold text-zinc-700 hover:bg-surface-50"
+              >
+                {copied ? <Check size={14} className="text-accent-600" /> : <Copy size={14} />}
+                {copied ? "Copiado" : "Copiar tudo"}
+              </button>
+            </div>
+            <div className="prose prose-sm max-w-none prose-headings:font-display">
+              <ReactMarkdown>{resultText}</ReactMarkdown>
+            </div>
+          </>
         )}
       </div>
     </div>

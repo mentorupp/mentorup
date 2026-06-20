@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { getAreaBySlug } from "@/lib/tools-config";
 import { UPLOAD_FORMAT_HINT } from "@/lib/upload-formats";
@@ -18,6 +18,7 @@ export default function AreaDetailPage() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
   const [demoNotice, setDemoNotice] = useState("");
+  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { update } = useSession();
@@ -67,6 +68,13 @@ export default function AreaDetailPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopy = async () => {
+    if (!result) return;
+    await navigator.clipboard.writeText(result);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -140,9 +148,24 @@ export default function AreaDetailPage() {
             </p>
           )}
           {result ? (
-            <div className="prose prose-sm max-h-[500px] max-w-none overflow-y-auto">
-              <ReactMarkdown>{result}</ReactMarkdown>
-            </div>
+            <>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="text-xs font-medium text-accent-800">
+                  Pronto para copiar e colar no Word (ABNT)
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void handleCopy()}
+                  className="flex items-center gap-1 rounded-lg border border-surface-200 px-2.5 py-1 text-xs font-semibold text-zinc-700 hover:bg-surface-50"
+                >
+                  {copied ? <Check size={14} className="text-accent-600" /> : <Copy size={14} />}
+                  {copied ? "Copiado" : "Copiar tudo"}
+                </button>
+              </div>
+              <div className="prose prose-sm max-h-[500px] max-w-none overflow-y-auto">
+                <ReactMarkdown>{result}</ReactMarkdown>
+              </div>
+            </>
           ) : (
             <p className="text-sm text-zinc-400">Resultado aparecerá aqui.</p>
           )}

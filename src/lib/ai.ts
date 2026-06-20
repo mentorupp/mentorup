@@ -1,9 +1,14 @@
 import OpenAI, { APIError } from "openai";
+import {
+  getAreaMaxTokens,
+  getToolInputLimit,
+  getToolMaxTokens,
+} from "@/lib/ai-config";
 
 const openai = process.env.OPENAI_API_KEY?.trim()
   ? new OpenAI({
       apiKey: process.env.OPENAI_API_KEY.trim(),
-      timeout: 55_000,
+      timeout: 58_000,
       maxRetries: 0,
     })
   : null;
@@ -117,12 +122,23 @@ function mapOpenAIError(error: unknown): AIError {
   );
 }
 
+export type GenerateAIOptions = {
+  toolId?: string;
+  maxTokens?: number;
+  inputLimit?: number;
+};
+
 async function callOpenAI(
   systemPrompt: string,
   userPrompt: string,
-  json: boolean
+  json: boolean,
+  options?: GenerateAIOptions
 ): Promise<string> {
   if (!openai) throw new AIError("OpenAI não configurada.");
+
+  const inputLimit = options?.inputLimit ?? getToolInputLimit(options?.toolId);
+  const maxTokens =
+    options?.maxTokens ?? getToolMaxTokens(options?.toolId ?? "", json);
 
   let lastError: unknown;
 
@@ -136,10 +152,10 @@ async function callOpenAI(
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt.slice(0, 12_000) },
+          { role: "user", content: userPrompt.slice(0, inputLimit) },
         ],
         temperature: 0.6,
-        max_tokens: json ? 2_500 : 2_000,
+        max_tokens: maxTokens,
         ...(json ? { response_format: { type: "json_object" } } : {}),
       });
 
@@ -171,7 +187,8 @@ async function callOpenAI(
 export async function generateAI(
   systemPrompt: string,
   userPrompt: string,
-  json = false
+  json = false,
+  options?: GenerateAIOptions
 ): Promise<AIResult> {
   if (!openai) {
     return {
@@ -182,7 +199,7 @@ export async function generateAI(
   }
 
   try {
-    const text = await callOpenAI(systemPrompt, userPrompt, json);
+    const text = await callOpenAI(systemPrompt, userPrompt, json, options);
     return { text, demo: false };
   } catch (error) {
     if (shouldFallbackToDemo(error)) {
@@ -208,7 +225,8 @@ async function callOpenAIVision(
   systemPrompt: string,
   userPrompt: string,
   images: VisionImage[],
-  json: boolean
+  json: boolean,
+  maxTokens?: number
 ): Promise<string> {
   if (!openai) throw new AIError("OpenAI não configurada.");
 
@@ -238,7 +256,7 @@ async function callOpenAIVision(
           },
         ],
         temperature: 0.3,
-        max_tokens: json ? 3_000 : 2_000,
+        max_tokens: maxTokens ?? getToolMaxTokens("exam-correction", json),
         ...(json ? { response_format: { type: "json_object" } } : {}),
       });
 
@@ -371,14 +389,27 @@ function generateDemoResponse(
     const questionTopics =
       topicLines.length > 0
         ? topicLines
-        : [topic.slice(0, 80), "Metodologia e fundamentação teórica", "Análise e conclusões"];
+        : [
+            topic.slice(0, 80),
+            "Fundamentação teórica",
+            "Metodologia e conceitos",
+            "Aplicações práticas",
+            "Análise crítica",
+            "Síntese e conclusões",
+          ];
 
-    const questions = questionTopics.slice(0, 6).map((label, index) => {
-      if (index % 3 === 2) {
+    const expandedTopics = [...questionTopics];
+    while (expandedTopics.length < 12) {
+      expandedTopics.push(`Tópico complementar ${expandedTopics.length + 1} do material`);
+    }
+
+    const questions = expandedTopics.slice(0, 15).map((label, index) => {
+      if (index % 4 === 3) {
         return {
           type: "discursive",
           question: `Discuta os aspectos centrais de "${label}" com base no material enviado.`,
           points: 2,
+          rubric: "Compreensão, argumentação, exemplos e clareza.",
         };
       }
 
@@ -400,7 +431,8 @@ function generateDemoResponse(
     const data = {
       exam: {
         title: `Simulado — ${topicLines[0]?.slice(0, 60) ?? topic.slice(0, 50)}`,
-        duration: "90 minutos",
+        duration: "120 minutos",
+        totalPoints: questions.reduce((s, q) => s + (q.points ?? 1), 0),
         questions,
       },
     };
@@ -490,13 +522,15 @@ function generateDemoResponse(
       ? topicLines.map((line) => `- **${line.slice(0, 70)}**`).join("\n")
       : "1. **Conceito central** — Identificado a partir do material enviado\n2. **Relações teóricas** — Conexões com a literatura da área\n3. **Aplicações práticas** — Uso em trabalhos e provas";
 
-  return `## Resultado — MentorUp (prévia local)
+  return `1 INTRODUÇÃO
 
-**Tema analisado:** ${topic.slice(0, 120)}
+${topic.slice(0, 120)}
 
-### Pontos do material
-${bulletPoints}
+2 DESENVOLVIMENTO
 
----
-*Prévia gerada localmente. Configure saldo na OpenAI para respostas completas da IA.*`;
+${bulletPoints.replace(/^- /gm, "").split("\n").map((line, i) => `${i + 1}. ${line.replace(/\*\*/g, "")}`).join("\n\n")}
+
+3 CONSIDERAÇÕES FINAIS
+
+Síntese dos pontos centrais do material analisado, com aplicação para estudo e avaliação acadêmica.`;
 }

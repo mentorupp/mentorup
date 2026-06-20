@@ -517,7 +517,7 @@ export const areas: AreaConfig[] = [
         promptHint: "tema ou conteúdo da prova",
         popular: true,
         systemPrompt:
-          "Gere 8 questões (mix objetiva e dissertativa) com gabarito comentado, nível graduação/residência, sobre o tema. Referencie conceitos-chave. Português BR.",
+          "Gere banco de questões COMPLETO em markdown: mínimo 15 questões (10+ objetivas com 4 alternativas e gabarito comentado detalhado; 5+ dissertativas com rubrica). Nível graduação/residência. Cubra todos os conceitos-chave do tema. Português BR.",
       },
       {
         id: "pico-evidence",

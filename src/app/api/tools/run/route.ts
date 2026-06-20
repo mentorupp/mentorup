@@ -2,6 +2,7 @@ import type { ToolType, Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AIError, generateAI, parseAIJsonResult } from "@/lib/ai";
+import { USER_MATERIAL_SUFFIX } from "@/lib/ai-config";
 import { logActivity } from "@/lib/activity";
 import { auth } from "@/lib/auth";
 import { checkAndDeductCredits } from "@/lib/credits";
@@ -11,7 +12,7 @@ import { TOOL_PROMPTS } from "@/lib/tool-prompts";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 90;
 
 const schema = z.object({
   toolId: z.string(),
@@ -57,11 +58,15 @@ export async function POST(req: Request) {
     if (options) {
       userPrompt += "\n\nOpções: " + JSON.stringify(options);
     }
+    if (!promptConfig.json) {
+      userPrompt += USER_MATERIAL_SUFFIX;
+    }
 
     const aiResult = await generateAI(
       promptConfig.system,
       userPrompt,
-      promptConfig.json
+      promptConfig.json,
+      { toolId }
     );
 
     let parsed: string | Record<string, unknown> = aiResult.text;

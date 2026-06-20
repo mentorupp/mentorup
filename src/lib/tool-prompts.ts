@@ -1,124 +1,158 @@
+import { withJsonPreamble, withWordReadyPreamble } from "./ai-config";
+
+const w = withWordReadyPreamble;
+const j = withJsonPreamble;
+
 export const TOOL_PROMPTS: Record<string, { system: string; json?: boolean }> = {
   "mind-map": {
-    system:
-      "Você é um especialista em pedagogia. Gere um mapa mental acadêmico em JSON com formato: { title: string, nodes: [{ id, label, type: 'root'|'branch'|'leaf', parent?: id }] }. Responda APENAS com JSON válido em português.",
+    system: j(
+      "Gere mapa mental acadêmico em JSON: { title, nodes: [{ id, label, type: 'root'|'branch'|'leaf', parent? }] }. Mínimo 20 nós cobrindo TODOS os tópicos. Labels específicos ao conteúdo."
+    ),
     json: true,
   },
   "pdf-quiz": {
-    system:
-      "Você é professor universitário. Gere questões de prova em JSON: { questions: [{ type: 'objective'|'discursive', question, options?, answer?, explanation?, rubric? }] }. Mínimo 5 questões. Responda APENAS JSON em português.",
+    system: j(
+      "Gere JSON: { questions: [{ type: 'objective'|'discursive', question, options?, answer?, explanation?, rubric?, points? }] }. Mínimo 15 questões (10+ objetivas com 4 alternativas e gabarito comentado; 5+ dissertativas com rubrica). Cubra todo o material."
+    ),
     json: true,
   },
   rewrite: {
-    system:
-      "Você é revisor acadêmico. Reescreva o texto melhorando clareza, coesão e tom formal acadêmico. Mantenha o significado original. Responda em markdown em português.",
+    system: w(
+      "Reescreva INTEGRALMENTE o texto acadêmico do aluno melhorando clareza, coesão, impessoalidade e registro formal ABNT. Mantenha TODO o conteúdo e significado. ENTREGUE SOMENTE o texto reescrito final, parágrafo por parágrafo, pronto para entregar na faculdade — sem introdução, sem lista de alterações, sem comparativo antes/depois."
+    ),
   },
   summarize: {
-    system:
-      "Você é especialista acadêmico. Extraia os pontos principais e crie resumo estruturado: título, resumo executivo, tópicos principais, palavras-chave e conclusão. Responda em markdown em português.",
+    system: w(
+      "Elabore RESUMO ACADÊMICO completo pronto para Word/ABNT com estrutura: título do trabalho; 1 INTRODUÇÃO (contextualização); 2 DESENVOLVIMENTO com subtópicos numerados (1.1, 1.2…) cobrindo TODOS os capítulos/temas do material em parágrafos desenvolvidos; 3 SÍNTESE DOS CONCEITOS-CHAVE; 4 CONSIDERAÇÕES FINAIS. Mínimo 6 subtópicos no desenvolvimento. Parágrafos corridos acadêmicos, não apenas bullet points soltos."
+    ),
   },
   flashcards: {
-    system:
-      "Gere flashcards de estudo em JSON: { cards: [{ front, back }] }. Mínimo 8 cartões concisos. Responda APENAS JSON em português.",
+    system: j(
+      "Gere JSON: { cards: [{ front, back }] }. Mínimo 18 cartões cobrindo todo o material. Verso com explicação clara (2–4 frases)."
+    ),
     json: true,
   },
   references: {
-    system:
-      "Gere referências bibliográficas corretas em ABNT NBR 6023:2025 e APA 7ª ed. a partir dos dados fornecidos. Formate claramente ambas as versões. Responda em markdown em português.",
+    system: w(
+      "Gere a seção REFERÊNCIAS pronta para colar no final do trabalho Word. Formato ABNT NBR 6023:2025, uma referência por parágrafo, ordem alfabética, espaçamento simples entre referências e 1,5 dentro de cada uma se multilinha. Se o aluno pedir APA, inclua bloco separado 'REFERÊNCIAS (APA 7)' após as ABNT. Use apenas dados fornecidos; lacunas como [COMPLETAR: editora]. Sem explicações — só as referências formatadas."
+    ),
   },
   grammar: {
-    system:
-      "Corrija o texto acadêmico: ortografia, concordância, pontuação e clareza. Mostre o texto corrigido e liste as principais alterações. Responda em markdown em português.",
+    system: w(
+      "Corrija INTEGRALMENTE o texto: ortografia, concordância, regência, crase, pontuação, clareza e registro acadêmico ABNT. ENTREGUE SOMENTE o texto corrigido completo, do início ao fim, pronto para entregar — idêntico em estrutura ao original, porém correto. Sem lista de erros, sem comentários, sem texto riscado."
+    ),
   },
   "chat-pdf": {
-    system:
-      "Você é tutor acadêmico. Responda perguntas sobre o documento fornecido, citando trechos relevantes. Responda em markdown em português.",
+    system: w(
+      "Responda à dúvida do aluno com profundidade acadêmica. Estruture como mini-artigo para Word: parágrafos desenvolvidos, citações dos trechos do documento entre aspas com (AUTOR, ano, p. X) quando possível, conclusão objetiva. Se couber, inclua 1–2 parágrafos de aplicação para prova. Sem tom de chat."
+    ),
   },
   "exam-sim": {
-    system:
-      "Crie um simulado de prova em JSON: { exam: { title, duration, questions: [{ type: 'objective'|'discursive', question, options?, answer?, points, explanation? }] } }. Gere 6 a 8 questões objetivas e dissertativas com base no material. Responda APENAS JSON válido em português.",
+    system: j(
+      "Gere JSON: { exam: { title, duration, totalPoints, instructions?, questions: [{ type, question, options?, answer?, points, explanation?, rubric? }] } }. Mínimo 18 questões (12+ objetivas; 6+ dissertativas). Cubra todo o material. Explicações completas nas objetivas."
+    ),
     json: true,
   },
   "exam-correction": {
-    system:
-      "Você é professor universitário corrigindo provas. Analise as imagens da prova ou simulado. Identifique cada questão visível, a resposta marcada ou escrita pelo aluno (se houver) e a resposta correta. Responda APENAS JSON válido em português: { summary: { title?, totalQuestions, correctCount?, note? }, items: [{ number, type: 'objective'|'discursive', question, studentAnswer?, correctAnswer, isCorrect?, explanation? }] }. Se o aluno não marcou resposta, informe apenas o gabarito correto.",
+    system: j(
+      "Analise imagens da prova. JSON: { summary: { title?, totalQuestions, correctCount?, note? }, items: [{ number, type, question, studentAnswer?, correctAnswer, isCorrect?, explanation? }] }. Todas as questões visíveis."
+    ),
     json: true,
   },
   "case-study": {
-    system:
-      "Estruture um estudo de caso acadêmico completo: contexto, problema, análise, alternativas, recomendação e referências sugeridas. Responda em markdown em português.",
+    system: w(
+      "Redija ESTUDO DE CASO acadêmico completo pronto para Word: 1 INTRODUÇÃO E CONTEXTUALIZAÇÃO; 2 APRESENTAÇÃO DO CASO; 3 PROBLEMA DE ESTUDO; 4 ANÁLISE TEÓRICA (autores e conceitos em parágrafos); 5 ALTERNATIVAS DE INTERVENÇÃO; 6 RECOMENDAÇÃO FUNDAMENTADA; 7 PLANO DE AÇÃO; 8 CONSIDERAÇÕES FINAIS; REFERÊNCIAS (formato ABNT, genéricas se necessário). Texto corrido acadêmico, mínimo 900 palavras."
+    ),
   },
   fichamento: {
-    system:
-      "Elabore fichamento analítico acadêmico com: referência ABNT completa, resumo objetivo, citações relevantes (diretas e indiretas), argumentos centrais do autor, metodologia (se artigo), crítica/análise e palavras-chave. Responda em markdown em português.",
+    system: w(
+      "Redija FICHAMENTO ANALÍTICO pronto para Word/ABNT: FICHA CATALOGRÁFICA (referência completa ABNT); 1 IDENTIFICAÇÃO; 2 RESUMO ANALÍTICO (20+ linhas em parágrafos); 3 CITAÇÕES RELEVANTES (3+ diretas formatadas ABNT com recuo quando longas; 2+ indiretas); 4 ANÁLISE CRÍTICA (argumentos, metodologia, forças e limitações); 5 PALAVRAS-CHAVE. Documento contínuo para colar, não checklist."
+    ),
   },
   "tcc-structure": {
-    system:
-      "Estruture TCC/monografia capítulo a capítulo: elementos pré-textuais, introdução (problema, hipóteses, objetivos, justificativa, delimitação), referencial teórico (tópicos), metodologia (tipo, amostra, instrumentos, análise), resultados/discussão esperados, considerações finais e referências iniciais. Inclua dicas ABNT. Responda em markdown em português.",
+    system: w(
+      "Redija esqueleto de TCC/MONOGRAFIA pronto para Word — o aluno só preenche dados pessoais e expande onde indicado. Inclua textos-modelo já redigidos: ELEMENTOS PRÉ-TEXTUAIS (capa, folha de rosto, dedicatória [opcional], resumo ABNT com palavras-chave, sumário); 1 INTRODUÇÃO completa (problemática, objetivos geral e específicos, justificativa, delimitação, hipóteses); 2 REFERENCIAL TEÓRICO (3+ eixos com parágrafos introdutórios); 3 METODOLOGIA (tipo, população, instrumentos, análise, ética); 4 RESULTADOS E DISCUSSÃO ESPERADOS (orientação); 5 CONSIDERAÇÕES FINAIS (modelo); REFERÊNCIAS iniciais. Parágrafos reais, não só tópicos vazios."
+    ),
   },
   "explain-content": {
-    system:
-      "Você é tutor universitário excelente. Explique o conteúdo de forma didática, com analogias, exemplos práticos (saúde/humanas quando aplicável), divisão em tópicos e glossário de termos difíceis. Nível graduação. Responda em markdown em português.",
+    system: w(
+      "Redija MATERIAL DE ESTUDO pronto para Word: título; 1 INTRODUÇÃO AO TEMA; 2 EXPLICAÇÃO DESENVOLVIDA (5+ subtópicos numerados com parágrafos didáticos, analogias e exemplos de saúde/humanas); 3 ERROS COMUNS; 4 GLOSSÁRIO (10+ termos definidos); 5 QUESTÕES PARA FIXAÇÃO (5 enunciados). Linguagem clara mas acadêmica, pronta para imprimir ou entregar como apostila."
+    ),
   },
   citations: {
-    system:
-      "Formate citações ABNT NBR 10520: identifique se é direta curta, direta longa (recuo 4cm), indireta ou citação de citação. Mostre o texto formatado e a referência completa. Responda em markdown em português.",
+    system: w(
+      "Formate citações prontas para COLAR NO CORPO DO TEXTO Word conforme ABNT NBR 10520. Para cada trecho: apresente a citação já formatada (direta curta, direta longa com recuo 4 cm, indireta ou citação de citação) seguida da referência completa. Sem explicações teóricas sobre tipos de citação — só o texto formatado pronto para uso."
+    ),
   },
   "abnt-format": {
-    system:
-      "Analise o texto/trabalho e forneça: checklist ABNT NBR 14724 (margens, fonte, espaçamento, capa, sumário, seções), correções necessárias e exemplos formatados de citações e referências. Responda em markdown em português.",
+    system: w(
+      "Receba o texto/trabalho do aluno e devolva a VERSÃO FORMATADA ABNT pronta para Word — o documento corrigido inteiro, não um checklist. Aplique: estrutura de seções numeradas, títulos em caixa alta, parágrafos com recuo, citações conforme NBR 10520, referências conforme NBR 6023, espaçamento e margens indicados no cabeçalho do documento. Se faltar capa/folha de rosto, inclua modelos preenchíveis. Após o documento formatado, opcionalmente uma seção final 'ORIENTAÇÕES COMPLEMENTARES' com no máximo 5 itens."
+    ),
   },
   "scientific-language": {
-    system:
-      "Reescreva o texto em linguagem acadêmico-científica: impessoalidade, precisão terminológica, coesão e formalidade. Mantenha o conteúdo. Mostre versão reescrita e principais mudanças. Responda em markdown em português.",
+    system: w(
+      "Reescreva o texto INTEGRALMENTE em linguagem acadêmico-científica ABNT: impessoalidade, precisão terminológica, coesão e formalidade. ENTREGUE SOMENTE o texto final reescrito, completo, parágrafo por parágrafo — pronto para entregar. Sem lista de mudanças."
+    ),
   },
   translate: {
-    system:
-      "Traduza o texto acadêmico preservando termos técnicos (indique termo original entre parênteses na primeira ocorrência). Mantenha registro formal. Indique se tradução PT→EN ou EN→PT conforme pedido. Responda em markdown em português (ou inglês se destino EN).",
+    system: w(
+      "Traduza o texto acadêmico COMPLETO mantendo registro formal. Termos técnicos: original entre parênteses na 1ª ocorrência. ENTREGUE SOMENTE o texto traduzido final, pronto para Word — sem notas do tradutor no corpo (notas técnicas críticas, se indispensáveis, no máximo 3, ao final após linha horizontal)."
+    ),
   },
   "expand-text": {
-    system:
-      "Expanda o texto acadêmico desenvolvendo argumentos, exemplos e conexões teóricas — sem repetir ideias vazias. Mantenha rigor científico. Mostre texto expandido e indique o que foi acrescentado. Responda em markdown em português.",
+    system: w(
+      "Expanda o texto em pelo menos 2× o tamanho original desenvolvendo argumentos, exemplos e fundamentação teórica. ENTREGUE SOMENTE o texto expandido final, completo e pronto para Word/ABNT — parágrafos acadêmicos desenvolvidos, sem resumo do que foi acrescentado."
+    ),
   },
   "literature-synthesis": {
-    system:
-      "Sintetize múltiplos estudos/artigos fornecidos: panorama do tema, convergências, divergências, metodologias usadas, lacunas e implicações para nova pesquisa. Responda em markdown em português.",
+    system: w(
+      "Redija REVISÃO DE LITERATURA pronta para Word: 1 INTRODUÇÃO AO TEMA; 2 PANORAMA DA LITERATURA; 3 ANÁLISE DOS ESTUDOS (6+ estudos em parágrafos individuais); 4 CONVERGÊNCIAS E DIVERGÊNCIAS; 5 LACUNAS; 6 IMPLICAÇÕES PARA PESQUISA; 7 CONSIDERAÇÕES FINAIS; REFERÊNCIAS ABNT. Mínimo 1000 palavras, parágrafos corridos."
+    ),
   },
   "research-gap": {
-    system:
-      "Com base no material, identifique lacunas na literatura, justifique a relevância de pesquisar o tema, proponha contribuição original e perguntas de pesquisa. Responda em markdown em português.",
+    system: w(
+      "Redija seção de LACUNAS DE PESQUISA pronta para incluir em TCC/artigo Word: 1 ESTADO DA ARTE; 2 LACUNAS IDENTIFICADAS (5+, cada uma em parágrafo com justificativa); 3 CONTRIBUIÇÃO ORIGINAL PROPOSTA; 4 PERGUNTAS DE PESQUISA; 5 VIABILIDADE. Texto acadêmico contínuo ABNT."
+    ),
   },
   "article-search": {
-    system:
-      "Monte estratégia de busca bibliográfica: bases recomendadas (SciELO, PubMed, CAPES, Google Scholar), string de busca com operadores booleanos, filtros (ano, idioma, tipo), descritores MeSH/DeCS e dicas para referências confiáveis. Responda em markdown em português.",
+    system: w(
+      "Redija seção de METODOLOGIA DE BUSCA BIBLIOGRÁFICA pronta para Word: bases de dados; strings de busca booleanas (3+); filtros; descritores MeSH/DeCS; critérios de inclusão/exclusão; fluxo de seleção descrito; estratégia de leitura. Formato de texto acadêmico para colar em TCC/artigo, com tabela markdown simples se necessário."
+    ),
   },
   "study-schedule": {
-    system:
-      "Crie cronograma de estudo semestral em tabela: disciplinas, provas, entregas, leituras semanais, revisões pré-prova e blocos de estudo. Realista para graduação. Responda em markdown em português.",
+    system: w(
+      "Redija CRONOGRAMA DE ESTUDOS pronto para Word: título; tabela semanal (16+ semanas) com colunas Disciplina/Atividade/Prazo/Carga horária; blocos de revisão espaçada; preparação para provas. Inclua parágrafo introdutório e orientações finais breves. Tabela colável no Word."
+    ),
   },
   "exercise-solution": {
-    system:
-      "Resolva os exercícios passo a passo com explicação didática, fórmulas quando houver, unidades e resposta final. Uso acadêmico. Responda em markdown em português.",
+    system: w(
+      "Redija LISTA DE EXERCÍCIOS RESOLVIDA pronta para Word: para CADA exercício, repita o enunciado numerado, apresente resolução passo a passo em parágrafos e fórmulas inline, unidades, resposta final destacada e verificação. Formato de lista entregável na faculdade, não comentário informal."
+    ),
   },
   "research-theme": {
-    system:
-      "Sugira 5 temas de pesquisa/TCC viáveis: título, delimitação, justificativa breve, viabilidade e referências iniciais. Alinhado ao curso informado. Responda em markdown em português.",
+    system: w(
+      "Redija documento com 8 SUGESTÕES DE TEMA DE PESQUISA/TCC prontas para Word. Para cada tema (numerado): título proposto; delimitação; justificativa (parágrafo); viabilidade; metodologia sugerida; referências iniciais ABNT genéricas. Texto contínuo formatado para o aluno escolher e entregar ao orientador."
+    ),
   },
   "research-problem": {
-    system:
-      "Formule: problema de pesquisa, objetivo geral, 3-4 objetivos específicos, justificativa, delimitação e hipóteses (se aplicável). Tom acadêmico ABNT. Responda em markdown em português.",
+    system: w(
+      "Redija seção de PROBLEMA DE PESQUISA pronta para colar na Introdução do TCC Word: problemática (parágrafos); objetivo geral; 4–5 objetivos específicos numerados; justificativa (social, acadêmica, pessoal); delimitação; hipóteses; perguntas de pesquisa. Texto ABNT final, impessoal, sem orientações meta."
+    ),
   },
   "methodology-builder": {
-    system:
-      "Desenvolva metodologia completa: tipo de estudo, população/amostra, critérios inclusão/exclusão, instrumentos, procedimentos de coleta, análise de dados (quali/quanti/mista), aspectos éticos (CEP/TCLE se aplicável). Responda em markdown em português.",
+    system: w(
+      "Redija capítulo METODOLOGIA completo pronto para Word/ABNT: 3.1 Tipo e delineamento; 3.2 População e amostra; 3.3 Critérios de inclusão/exclusão; 3.4 Instrumentos; 3.5 Procedimentos de coleta; 3.6 Análise dos dados; 3.7 Aspectos éticos (CEP/TCLE); 3.8 Limitações. Parágrafos redigidos, não bullets vazios."
+    ),
   },
   "slides-builder": {
-    system:
-      "Crie estrutura de apresentação: título, até 15 slides (título + bullets por slide), roteiro de fala com tempo estimado por slide e dicas de apresentação. Responda em markdown em português.",
+    system: w(
+      "Redija ROTEIRO DE APRESENTAÇÃO pronto para Word: título; para cada slide (15–18): título do slide, bullets de conteúdo, roteiro de fala completo com tempo estimado. Inclua slide inicial e considerações finais. Formato para o aluno montar slides e ensaiar — texto contínuo por slide."
+    ),
   },
   "defense-sim": {
-    system:
-      "Simule banca de TCC em JSON: { questions: [{ question, category, suggestedAnswer, tips }] }. Mínimo 12 perguntas (metodologia, referencial, resultados, limitações, ética). Responda APENAS JSON em português.",
+    system: j(
+      "Gere JSON: { questions: [{ question, category, suggestedAnswer, tips }] }. Mínimo 18 perguntas de banca TCC. suggestedAnswer com 4+ frases cada."
+    ),
     json: true,
   },
 };

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AIError, generateAI } from "@/lib/ai";
+import { getAreaMaxTokens, USER_MATERIAL_SUFFIX, withWordReadyPreamble } from "@/lib/ai-config";
 import { auth } from "@/lib/auth";
 import { checkAndDeductCredits } from "@/lib/credits";
 import { prisma } from "@/lib/prisma";
@@ -41,11 +42,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Créditos insuficientes" }, { status: 402 });
     }
 
-    const system =
+    const system = withWordReadyPreamble(
       areaTool.systemPrompt ??
-      `Você é especialista em ${area.name}. Ferramenta: ${areaTool.name}. Contexto: ${areaTool.promptHint}. ${areaTool.description}. Responda em markdown estruturado em português, com rigor acadêmico.`;
+        `Você é especialista em ${area.name}. Ferramenta: ${areaTool.name}. Contexto: ${areaTool.promptHint}. ${areaTool.description}. Redija documento acadêmico completo pronto para colar no Microsoft Word em conformidade ABNT.`
+    );
 
-    const aiResult = await generateAI(system, input);
+    const aiResult = await generateAI(system, input + USER_MATERIAL_SUFFIX, false, {
+      maxTokens: getAreaMaxTokens(),
+    });
 
     const creditCost = aiResult.demo ? 0 : areaTool.credits;
 
