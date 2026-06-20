@@ -11,8 +11,7 @@
     "db:push": "prisma db push",
     "db:admin": "node scripts/set-admin.mjs",
     "db:setup": "node scripts/setup-db.mjs",
-    "db:studio": "prisma studio",
-    "brand:process": "node scripts/process-brand-hq.mjs"
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.9.1",

@@ -5,7 +5,6 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Crown, Loader2, ShieldCheck } from "lucide-react";
-import MentorUpLogo from "@/components/MentorUpLogo";
 import { areas } from "@/lib/tools-config";
 import { formatCpf, formatPhone } from "@/lib/br-validation";
 
@@ -66,7 +65,9 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen">
       <div className="hidden flex-1 flex-col justify-between bg-gradient-to-br from-primary-600 to-accent-500 p-12 text-white lg:flex">
-        <MentorUpLogo href="/" variant="white" size="xl" />
+        <Link href="/" className="font-display text-2xl font-bold">
+          MentorUp
+        </Link>
         <div>
           <h1 className="font-display text-4xl font-extrabold">Comece grátis</h1>
           <p className="mt-4 max-w-md text-primary-100">
@@ -87,10 +88,6 @@ export default function RegisterPage() {
 
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
-            <MentorUpLogo href="/" size="lg" />
-          </div>
-
           <h2 className="font-display text-2xl font-extrabold">Criar conta</h2>
           <p className="mt-1 text-sm text-zinc-500">
             Já tem conta?{" "}

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import MentorUpLogo from "@/components/MentorUpLogo";
 import { navLinks } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -37,13 +36,20 @@ export default function Header() {
     <header className="fixed top-0 right-0 left-0 z-50 px-4 pt-3 sm:px-6 lg:px-8">
       <div
         className={cn(
-          "container-custom mx-auto flex h-16 items-center justify-between rounded-2xl px-4 transition-all duration-300 lg:px-5",
+          "container-custom mx-auto flex h-14 items-center justify-between rounded-2xl px-4 transition-all duration-300 lg:px-5",
           scrolled
             ? "border border-zinc-200/80 bg-white/85 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl"
             : "bg-transparent"
         )}
       >
-        <MentorUpLogo href="/" size="xl" />
+        <Link href="/" className="group flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 text-xs font-bold text-white shadow-md shadow-primary-500/25 transition group-hover:scale-105">
+            M
+          </div>
+          <span className="font-display text-lg font-bold tracking-tight">
+            Mentor<span className="text-primary-600">Up</span>
+          </span>
+        </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex">
           {navLinks.slice(0, 6).map((link) => (

@@ -8,7 +8,6 @@ import {
   Youtube,
 } from "lucide-react";
 import Link from "next/link";
-import MentorUpLogo from "@/components/MentorUpLogo";
 import { contactInfo, footerLinks, navLinks, services } from "@/lib/data";
 
 export default function Footer() {
@@ -19,7 +18,14 @@ export default function Footer() {
       <div className="container-custom px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <MentorUpLogo href="/" variant="white" size="xl" />
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-accent-500">
+                <span className="text-sm font-bold text-white">M</span>
+              </div>
+              <span className="font-display text-xl font-bold text-white">
+                Mentor<span className="text-primary-400">Up</span>
+              </span>
+            </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed">
               Consultoria acadêmica de excelência para estudantes que buscam
               qualidade, originalidade e resultados comprovados.

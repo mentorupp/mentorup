@@ -5,7 +5,6 @@ import {
   Star,
 } from "lucide-react";
 import Link from "next/link";
-import MentorUpLogo from "@/components/MentorUpLogo";
 import { stats } from "@/lib/data";
 
 export default function Hero() {
@@ -62,7 +61,9 @@ export default function Hero() {
             <div className="animate-float relative card-premium overflow-hidden p-6">
               <div className="mb-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <MentorUpLogo variant="icon" size="md" href={null} className="shrink-0" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 text-sm font-bold text-white">
+                    M
+                  </div>
                   <div>
                     <p className="font-display text-sm font-bold">Painel MentorUp</p>
                     <p className="text-xs text-zinc-400">Engenharia Civil · 12 créditos</p>

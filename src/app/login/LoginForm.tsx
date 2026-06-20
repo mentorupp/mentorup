@@ -5,7 +5,6 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import MentorUpLogo from "@/components/MentorUpLogo";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -43,7 +42,9 @@ export default function LoginForm() {
   return (
     <div className="flex min-h-screen">
       <div className="hidden flex-1 flex-col justify-between bg-gradient-to-br from-primary-600 via-primary-500 to-accent-500 p-12 text-white lg:flex">
-        <MentorUpLogo href="/" variant="white" size="xl" />
+        <Link href="/" className="font-display text-2xl font-bold">
+          Mentor<span className="text-primary-200">Up</span>
+        </Link>
         <div>
           <h1 className="font-display text-4xl font-extrabold leading-tight">
             Sua plataforma acadêmica com IA
@@ -57,9 +58,9 @@ export default function LoginForm() {
 
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
-            <MentorUpLogo href="/" size="lg" />
-          </div>
+          <Link href="/" className="font-display mb-8 block text-2xl font-bold lg:hidden">
+            Mentor<span className="text-primary-600">Up</span>
+          </Link>
 
           <h2 className="font-display text-2xl font-extrabold">Entrar</h2>
           <p className="mt-1 text-sm text-zinc-500">
