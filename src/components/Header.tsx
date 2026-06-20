@@ -1,9 +1,10 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
+import MentorUpLogo from "@/components/MentorUpLogo";
 import { navLinks } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -42,14 +43,7 @@ export default function Header() {
             : "bg-transparent"
         )}
       >
-        <Link href="/" className="group flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 text-xs font-bold text-white shadow-md shadow-primary-500/25 transition group-hover:scale-105">
-            M
-          </div>
-          <span className="font-display text-lg font-bold tracking-tight">
-            Mentor<span className="text-primary-600">Up</span>
-          </span>
-        </Link>
+        <MentorUpLogo href="/" size="sm" priority />
 
         <nav className="hidden items-center gap-0.5 lg:flex">
           {navLinks.slice(0, 6).map((link) => (

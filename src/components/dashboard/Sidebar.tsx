@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BookOpen,
   CreditCard,
   Crown,
   GitBranch,
@@ -17,6 +16,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import MentorUpLogo from "@/components/MentorUpLogo";
 import { cn } from "@/lib/utils";
 import { areas, tools } from "@/lib/tools-config";
 
@@ -35,15 +35,8 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col border-r border-surface-200 bg-white">
-      <div className="flex h-16 items-center gap-2.5 border-b border-surface-200 px-5">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 text-sm font-bold text-white">
-            M
-          </div>
-          <span className="font-display text-lg font-bold">
-            Mentor<span className="text-primary-600">Up</span>
-          </span>
-        </Link>
+      <div className="flex h-16 items-center border-b border-surface-200 px-5">
+        <MentorUpLogo href="/dashboard" size="sm" />
       </div>
 
       <div
