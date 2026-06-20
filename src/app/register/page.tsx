@@ -66,7 +66,7 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen">
       <div className="hidden flex-1 flex-col justify-between bg-gradient-to-br from-primary-600 to-accent-500 p-12 text-white lg:flex">
-        <MentorUpLogo href="/" variant="white" size="lg" />
+        <MentorUpLogo href="/" variant="white" size="xl" />
         <div>
           <h1 className="font-display text-4xl font-extrabold">Comece grátis</h1>
           <p className="mt-4 max-w-md text-primary-100">
@@ -88,7 +88,7 @@ export default function RegisterPage() {
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
-            <MentorUpLogo href="/" size="md" />
+            <MentorUpLogo href="/" size="lg" />
           </div>
 
           <h2 className="font-display text-2xl font-extrabold">Criar conta</h2>

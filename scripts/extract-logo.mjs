@@ -25,6 +25,7 @@ async function removeNearBlack(input, output, threshold = 28) {
   await sharp(data, {
     raw: { width: info.width, height: info.height, channels: 4 },
   })
+    .trim()
     .png()
     .toFile(output);
 }
@@ -64,9 +65,12 @@ async function main() {
 
   await removeNearBlack(iconBuf, path.join(outDir, "logo-icon.png"));
   await sharp(path.join(outDir, "logo-icon.png"))
-    .resize({ width: 128, height: 128, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .trim()
+    .resize({ width: 256, height: 256, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .toFile(path.join(outDir, "logo-icon-trimmed.png"));
+  await sharp(path.join(outDir, "logo-icon-trimmed.png"))
     .png()
-    .toFile(path.join(outDir, "favicon-512.png"));
+    .toFile(path.join(outDir, "logo-icon.png"));
 
   console.log("Logo assets generated in public/brand/");
 }

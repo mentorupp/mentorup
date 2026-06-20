@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 type LogoVariant = "color" | "white" | "icon";
-type LogoSize = "xs" | "sm" | "md" | "lg";
+type LogoSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 const assets = {
   color: "/brand/logo-transparent-sm.png",
@@ -12,10 +12,19 @@ const assets = {
 } as const;
 
 const heights: Record<LogoSize, number> = {
-  xs: 28,
-  sm: 32,
-  md: 40,
-  lg: 52,
+  xs: 40,
+  sm: 48,
+  md: 56,
+  lg: 68,
+  xl: 84,
+};
+
+const maxWidths: Record<LogoSize, number> = {
+  xs: 200,
+  sm: 240,
+  md: 280,
+  lg: 340,
+  xl: 400,
 };
 
 interface MentorUpLogoProps {
@@ -34,18 +43,18 @@ export default function MentorUpLogo({
   priority = false,
 }: MentorUpLogoProps) {
   const height = heights[size];
+  const maxWidth = variant === "icon" ? height : maxWidths[size];
   const src = assets[variant];
-  const width = variant === "icon" ? height : Math.round(height * 4.2);
 
   const image = (
     <Image
       src={src}
       alt="MentorUp"
-      width={width}
+      width={maxWidth}
       height={height}
       priority={priority}
-      className={cn("h-auto w-auto object-contain object-left", className)}
-      style={{ height, width: variant === "icon" ? height : "auto", maxWidth: variant === "icon" ? height : 220 }}
+      className={cn("w-auto object-contain object-left", className)}
+      style={{ height, maxWidth, width: "auto" }}
     />
   );
 

@@ -35,8 +35,8 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col border-r border-surface-200 bg-white">
-      <div className="flex h-16 items-center border-b border-surface-200 px-5">
-        <MentorUpLogo href="/dashboard" size="sm" />
+      <div className="flex h-[4.5rem] items-center border-b border-surface-200 px-5">
+        <MentorUpLogo href="/dashboard" size="lg" />
       </div>
 
       <div

@@ -62,7 +62,7 @@ export default function Hero() {
             <div className="animate-float relative card-premium overflow-hidden p-6">
               <div className="mb-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <MentorUpLogo variant="icon" size="sm" href={null} className="shrink-0" />
+                  <MentorUpLogo variant="icon" size="md" href={null} className="shrink-0" />
                   <div>
                     <p className="font-display text-sm font-bold">Painel MentorUp</p>
                     <p className="text-xs text-zinc-400">Engenharia Civil · 12 créditos</p>

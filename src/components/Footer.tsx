@@ -19,7 +19,7 @@ export default function Footer() {
       <div className="container-custom px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <MentorUpLogo href="/" variant="white" size="md" />
+            <MentorUpLogo href="/" variant="white" size="xl" />
             <p className="mt-4 max-w-xs text-sm leading-relaxed">
               Consultoria acadêmica de excelência para estudantes que buscam
               qualidade, originalidade e resultados comprovados.

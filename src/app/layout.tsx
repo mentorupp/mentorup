@@ -34,10 +34,7 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     siteName: "MentorUp",
   },
-  icons: {
-    icon: [{ url: "/brand/favicon-512.png", type: "image/png" }],
-    apple: "/brand/favicon-512.png",
-  },
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({
