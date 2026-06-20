@@ -6,25 +6,20 @@ type LogoVariant = "color" | "white" | "icon";
 type LogoSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 const assets = {
-  color: "/brand/logo-transparent-sm.png",
-  white: "/brand/logo-white-transparent.png",
+  color: "/brand/logo-full.png",
+  white: "/brand/logo-white.png",
   icon: "/brand/logo-icon.png",
 } as const;
 
-const heights: Record<LogoSize, number> = {
-  xs: 40,
-  sm: 48,
-  md: 56,
-  lg: 68,
-  xl: 84,
-};
+/** Proporção real da logo completa (ícone + wordmark) */
+const WORDMARK_RATIO = 3.68;
 
-const maxWidths: Record<LogoSize, number> = {
-  xs: 200,
-  sm: 240,
-  md: 280,
-  lg: 340,
-  xl: 400,
+const heights: Record<LogoSize, number> = {
+  xs: 38,
+  sm: 46,
+  md: 54,
+  lg: 62,
+  xl: 74,
 };
 
 interface MentorUpLogoProps {
@@ -43,18 +38,19 @@ export default function MentorUpLogo({
   priority = false,
 }: MentorUpLogoProps) {
   const height = heights[size];
-  const maxWidth = variant === "icon" ? height : maxWidths[size];
+  const width =
+    variant === "icon" ? height : Math.round(height * WORDMARK_RATIO);
   const src = assets[variant];
 
   const image = (
     <Image
       src={src}
       alt="MentorUp"
-      width={maxWidth}
+      width={width}
       height={height}
       priority={priority}
       className={cn("w-auto object-contain object-left", className)}
-      style={{ height, maxWidth, width: "auto" }}
+      style={{ height, width: "auto", maxWidth: width }}
     />
   );
 

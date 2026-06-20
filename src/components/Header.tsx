@@ -43,7 +43,7 @@ export default function Header() {
             : "bg-transparent"
         )}
       >
-        <MentorUpLogo href="/" size="lg" priority />
+        <MentorUpLogo href="/" size="xl" priority />
 
         <nav className="hidden items-center gap-0.5 lg:flex">
           {navLinks.slice(0, 6).map((link) => (
