@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import FerramentasShowcase from "@/components/FerramentasShowcase";
 import PageHero from "@/components/PageHero";
+import { areas, tools } from "@/lib/tools-config";
+
+const totalTools = tools.length + areas.reduce((n, a) => n + a.tools.length, 0);
 
 export const metadata: Metadata = {
   title: "Ferramentas IA — MentorUp",
   description:
-    "Mais de 39 ferramentas de IA para estudantes: mapas mentais, questões, flashcards, ABNT e ferramentas por área do conhecimento.",
+    "Ferramentas de IA para Saúde e Psicologia & Humanas: mapas mentais, flashcards, casos clínicos, codificação qualitativa, TCC e mais.",
 };
 
 export default function FerramentasPage() {
@@ -15,11 +18,10 @@ export default function FerramentasPage() {
         label="Plataforma IA"
         title={
           <>
-            Mais de{" "}
-            <span className="text-gradient">39 ferramentas</span> para você
+            <span className="text-gradient">{totalTools}+ ferramentas</span> para Saúde e Humanas
           </>
         }
-        description="Do PDF ao mapa mental, da prova simulada ao relatório de estágio — tudo pensado para a vida real da faculdade."
+        description="Do caso clínico ao fichamento, do plano NANDA ao roteiro de entrevista — feito para quem estuda e cuida de pessoas."
       />
       <FerramentasShowcase />
     </>

@@ -27,9 +27,8 @@ export default function Hero() {
             </h1>
 
             <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-zinc-500 sm:text-base">
-              Mapas mentais, questões de PDF, flashcards e ferramentas por área —
-              com IA de verdade. Consultoria humana para TCC e monografia quando
-              você precisar ir além.
+              IA especializada em Saúde e Psicologia & Humanas — casos clínicos, flashcards,
+              pesquisa qualitativa e TCC. Consultoria humana quando precisar ir além.
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -43,7 +42,7 @@ export default function Hero() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-              {["Sem cartão de crédito", "ABNT grátis", "8 áreas do conhecimento"].map(
+              {["Sem cartão de crédito", "ABNT grátis", "Saúde e Humanas"].map(
                 (item) => (
                   <span
                     key={item}

@@ -31,7 +31,7 @@ const paths = [
     highlights: [
       "15 créditos grátis todo mês",
       "ABNT ilimitado sem custo",
-      "39+ ferramentas por área",
+      "Ferramentas por área (Saúde e Humanas)",
       "Histórico salvo no painel",
     ],
     tempo: "Segundos a minutos",
@@ -75,7 +75,7 @@ const iaSteps = [
     step: "02",
     title: "Escolha a ferramenta",
     description: "Mapa mental, questões, flashcards ou ferramenta da sua área.",
-    detail: "Mais de 39 ferramentas organizadas por curso e objetivo.",
+    detail: "Mais de 40 ferramentas para Saúde e Psicologia & Humanas.",
     icon: Wrench,
   },
   {

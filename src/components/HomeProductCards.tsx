@@ -8,7 +8,7 @@ const products = [
     label: "Plataforma IA",
     title: "Estude com IA no dia a dia",
     description:
-      "Mapas mentais, questões de PDF, flashcards, ABNT grátis e ferramentas por área. 15 créditos/mês sem pagar nada.",
+      "Mapas mentais, questões, flashcards, ABNT grátis e ferramentas para Saúde e Humanas. 15 créditos/mês sem pagar nada.",
     cta: "Ver ferramentas",
     accent: "from-primary-600 to-primary-500",
   },

@@ -5,20 +5,14 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Brain,
-  Calculator,
-  FlaskConical,
   GitBranch,
-  Layers,
-  PenLine,
-  Scale,
   Sparkles,
   Stethoscope,
-  Zap,
 } from "lucide-react";
-import { areas, tools } from "@/lib/tools-config";
+import { areas, platformFocus, tools } from "@/lib/tools-config";
 import { cn } from "@/lib/utils";
 
-const coreTools = tools.filter((t) => t.category === "core");
+const popularTools = tools.filter((t) => t.popular);
 const premiumTools = tools.filter((t) => t.category === "premium");
 const areaToolCount = areas.reduce((n, a) => n + a.tools.length, 0);
 const totalTools = tools.length + areaToolCount;
@@ -26,12 +20,6 @@ const totalTools = tools.length + areaToolCount;
 const areaIcons: Record<string, typeof Brain> = {
   saude: Stethoscope,
   "psicologia-humanas": Brain,
-  engenharia: Calculator,
-  direito: Scale,
-  administracao: Zap,
-  biologicas: FlaskConical,
-  comunicacao: PenLine,
-  arquitetura: Layers,
 };
 
 function useInView(threshold = 0.12) {
@@ -167,7 +155,7 @@ export default function FerramentasShowcase() {
             )}
           >
             {[
-              { value: tools.length, label: "Ferramentas principais", sub: "Estudo e produção", suffix: "" },
+              { value: tools.length, label: "Ferramentas principais", sub: "Produção, estudo e TCC", suffix: "" },
               { value: areaToolCount, label: "Ferramentas por área", sub: "Especializadas no seu curso", suffix: "" },
               { value: totalTools, label: "Total na plataforma", sub: "E crescendo", suffix: "+" },
             ].map((stat) => (
@@ -196,15 +184,16 @@ export default function FerramentasShowcase() {
               essentials.visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
             )}
           >
-            <span className="section-label">Essenciais</span>
-            <h2 className="section-title mt-2">Para o dia a dia da faculdade</h2>
+            <span className="section-label">Mais usadas</span>
+            <h2 className="section-title mt-2">O que universitários mais pedem hoje</h2>
             <p className="mt-2 max-w-xl text-sm text-zinc-500">
-              Mapas, questões, resumos, flashcards e referências — tudo que você usa toda semana.
+              Resumir PDF, reescrever, ABNT, referências, slides, explicar conteúdo, flashcards e
+              cronograma — tudo integrado.
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {coreTools.map((tool, i) => (
+            {popularTools.map((tool, i) => (
               <ToolCard
                 key={tool.id}
                 name={tool.name}
@@ -231,10 +220,10 @@ export default function FerramentasShowcase() {
               premium.visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
             )}
           >
-            <span className="section-label">Avançadas</span>
-            <h2 className="section-title mt-2">Quando a prova ou o TCC aperta</h2>
+            <span className="section-label">TCC e pesquisa</span>
+            <h2 className="section-title mt-2">Do tema à defesa</h2>
             <p className="mt-2 max-w-xl text-sm text-zinc-500">
-              Simulados completos e estudos de caso com metodologia acadêmica.
+              Metodologia, síntese bibliográfica, simulado de banca e estrutura completa de monografia.
             </p>
           </div>
 
@@ -264,13 +253,12 @@ export default function FerramentasShowcase() {
               areasSection.visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
             )}
           >
-            <span className="section-label">Por área do conhecimento</span>
+            <span className="section-label">Especialização</span>
             <h2 className="section-title mt-2">
-              <span className="text-gradient">{areaToolCount}+ ferramentas</span> do seu curso
+              <span className="text-gradient">{areaToolCount} ferramentas</span> para Saúde e Humanas
             </h2>
             <p className="mt-2 max-w-xl text-sm text-zinc-500">
-              Saúde, engenharia, direito, humanas e mais — cada área com ferramentas feitas para
-              aquela disciplina.
+              {platformFocus.description}
             </p>
           </div>
 
@@ -329,8 +317,9 @@ export default function FerramentasShowcase() {
                 </div>
                 <div>
                   <h3 className="font-display text-xl font-bold">{selectedArea.name}</h3>
-                  <p className="text-sm text-zinc-500">
-                    {selectedArea.tools.length} ferramentas especializadas
+                  <p className="text-sm text-zinc-500">{selectedArea.subtitle}</p>
+                  <p className="mt-1 text-xs text-zinc-400">
+                    {selectedArea.tools.length} ferramentas · {selectedArea.courses.slice(0, 4).join(", ")}…
                   </p>
                 </div>
               </div>
@@ -346,7 +335,14 @@ export default function FerramentasShowcase() {
                         : undefined,
                     }}
                   >
-                    <p className="font-display text-sm font-bold text-zinc-800">{tool.name}</p>
+                    <p className="font-display text-sm font-bold text-zinc-800">
+                      {tool.name}
+                      {"popular" in tool && tool.popular && (
+                        <span className="ml-2 rounded bg-primary-100 px-1.5 py-0.5 text-[9px] font-bold text-primary-700 uppercase">
+                          Popular
+                        </span>
+                      )}
+                    </p>
                     <p className="mt-1 text-xs leading-relaxed text-zinc-500">{tool.description}</p>
                   </div>
                 ))}

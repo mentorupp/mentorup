@@ -118,8 +118,8 @@ export default async function DashboardPage() {
         })}
       </div>
 
-      <h2 className="font-display mb-4 text-xl font-bold">Por Área do Conhecimento</h2>
-      <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <h2 className="font-display mb-4 text-xl font-bold">Saúde e Humanas</h2>
+      <div className="mb-10 grid gap-4 sm:grid-cols-2">
         {areas.map((area) => {
           const Icon = area.icon;
           return (

@@ -26,7 +26,7 @@ const highlights = [
   {
     icon: Zap,
     title: "8 Áreas do Conhecimento",
-    description: "Saúde, engenharia, direito, humanas e mais.",
+    description: "Saúde e Psicologia & Humanas — casos clínicos, pesquisa qualitativa e TCC.",
     className: "sm:col-span-2",
   },
 ];

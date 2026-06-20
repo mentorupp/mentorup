@@ -72,7 +72,7 @@ export default function AreaDetailPage() {
         </div>
         <div>
           <h1 className="font-display text-2xl font-extrabold">{area.name}</h1>
-          <p className="text-sm text-zinc-500">{area.tools.length} ferramentas especializadas</p>
+          <p className="text-sm text-zinc-500">{area.subtitle}</p>
         </div>
       </div>
 

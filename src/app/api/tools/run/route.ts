@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { checkAndDeductCredits } from "@/lib/credits";
 import { prisma } from "@/lib/prisma";
 import { getToolById } from "@/lib/tools-config";
+import { TOOL_PROMPTS } from "@/lib/tool-prompts";
 
 export const dynamic = "force-dynamic";
 
@@ -16,53 +17,6 @@ const schema = z.object({
   options: z.record(z.string()).optional(),
   title: z.string().optional(),
 });
-
-const PROMPTS: Record<string, { system: string; json?: boolean }> = {
-  "mind-map": {
-    system:
-      "Você é um especialista em pedagogia. Gere um mapa mental acadêmico em JSON com formato: { title: string, nodes: [{ id, label, type: 'root'|'branch'|'leaf', parent?: id }] }. Responda APENAS com JSON válido em português.",
-    json: true,
-  },
-  "pdf-quiz": {
-    system:
-      "Você é professor universitário. Gere questões de prova em JSON: { questions: [{ type: 'objective'|'discursive', question, options?, answer?, explanation?, rubric? }] }. Mínimo 5 questões. Responda APENAS JSON em português.",
-    json: true,
-  },
-  rewrite: {
-    system:
-      "Você é revisor acadêmico. Reescreva o texto melhorando clareza, coesão e tom formal acadêmico. Mantenha o significado original. Responda em markdown em português.",
-  },
-  summarize: {
-    system:
-      "Você é especialista acadêmico. Crie um resumo estruturado com: título, resumo executivo, tópicos principais (bullet points), palavras-chave ABNT, e conclusão. Responda em markdown em português.",
-  },
-  flashcards: {
-    system:
-      "Gere flashcards de estudo em JSON: { cards: [{ front, back }] }. Mínimo 8 cartões concisos. Responda APENAS JSON em português.",
-    json: true,
-  },
-  references: {
-    system:
-      "Gere referências bibliográficas corretas em ABNT NBR 6023:2025 e APA 7ª ed. a partir dos dados fornecidos. Formate claramente ambas as versões. Responda em markdown em português.",
-  },
-  grammar: {
-    system:
-      "Corrija o texto acadêmico: ortografia, concordância, pontuação e clareza. Mostre o texto corrigido e liste as principais alterações. Responda em markdown em português.",
-  },
-  "chat-pdf": {
-    system:
-      "Você é tutor acadêmico. Responda perguntas sobre o documento fornecido, citando trechos relevantes. Responda em markdown em português.",
-  },
-  "exam-sim": {
-    system:
-      "Crie um simulado de prova completo em JSON: { exam: { title, duration, questions: [{ type, question, options?, answer?, points }] } }. Mínimo 10 questões variadas. Responda APENAS JSON em português.",
-    json: true,
-  },
-  "case-study": {
-    system:
-      "Estruture um estudo de caso acadêmico completo: contexto, problema, análise, alternativas, recomendação e referências sugeridas. Responda em markdown em português.",
-  },
-};
 
 export async function POST(req: Request) {
   try {
@@ -79,7 +33,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Ferramenta não encontrada" }, { status: 404 });
     }
 
-    const promptConfig = PROMPTS[toolId];
+    const promptConfig = TOOL_PROMPTS[toolId];
     if (!promptConfig) {
       return NextResponse.json({ error: "Prompt não configurado" }, { status: 400 });
     }

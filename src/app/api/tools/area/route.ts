@@ -39,10 +39,11 @@ export async function POST(req: Request) {
       { areaSlug, toolId }
     );
 
-    const result = await generateAI(
-      `Você é especialista em ${area.name}. Ferramenta: ${areaTool.name}. ${areaTool.description}. Responda em markdown estruturado em português, com rigor acadêmico.`,
-      input
-    );
+    const system =
+      areaTool.systemPrompt ??
+      `Você é especialista em ${area.name}. Ferramenta: ${areaTool.name}. Contexto: ${areaTool.promptHint}. ${areaTool.description}. Responda em markdown estruturado em português, com rigor acadêmico.`;
+
+    const result = await generateAI(system, input);
 
     await prisma.savedItem.create({
       data: {

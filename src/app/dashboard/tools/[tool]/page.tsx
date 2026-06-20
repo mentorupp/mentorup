@@ -4,17 +4,35 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-const toolPages: Record<string, { placeholder: string }> = {
-  "mind-map": { placeholder: "Envie PDF/Word ou cole o conteúdo da aula, artigo ou capítulo..." },
-  "pdf-quiz": { placeholder: "Envie PDF/Word ou cole o material de estudo para gerar questões..." },
-  rewrite: { placeholder: "Envie PDF/Word ou cole o texto que deseja reescrever..." },
-  summarize: { placeholder: "Envie PDF/Word ou cole o material completo para resumir..." },
-  flashcards: { placeholder: "Envie PDF/Word ou cole o conteúdo para gerar flashcards..." },
-  references: { placeholder: "Informe: autor, título, ano, editora, URL ou DOI..." },
-  grammar: { placeholder: "Envie PDF/Word ou cole o texto para correção gramatical..." },
-  "chat-pdf": { placeholder: "Envie PDF/Word ou cole o documento — depois faça sua pergunta no início do texto..." },
-  "exam-sim": { placeholder: "Envie PDF/Word ou cole o material da disciplina para o simulado..." },
-  "case-study": { placeholder: "Envie PDF/Word, cole o material ou descreva o caso..." },
+const placeholders: Record<string, string> = {
+  summarize: "Envie PDF/Word ou cole o artigo, capítulo ou apostila para resumir...",
+  "explain-content": "Cole o trecho ou descreva o conceito que você não entendeu...",
+  "mind-map": "Envie PDF/Word ou cole o conteúdo da aula para gerar o mapa mental...",
+  flashcards: "Envie PDF/Word ou cole o material para gerar flashcards...",
+  "pdf-quiz": "Envie PDF/Word ou cole o material para gerar questões de estudo...",
+  "exam-sim": "Envie PDF/Word ou cole o material da disciplina para o simulado...",
+  "exercise-solution": "Cole a lista de exercícios ou questões para resolução comentada...",
+  "study-schedule": "Informe suas disciplinas, datas de provas e prazo do semestre...",
+  "chat-pdf": "Envie PDF/Word ou cole o documento — inclua sua pergunta no início...",
+  references: "Informe: autor, título, ano, editora, URL ou DOI...",
+  citations: "Cole o trecho a citar e os dados da fonte (autor, ano, página)...",
+  "abnt-format": "Cole trechos do trabalho ou descreva o que precisa formatar (capa, citações, referências)...",
+  rewrite: "Envie PDF/Word ou cole o texto que deseja reescrever...",
+  grammar: "Envie PDF/Word ou cole o texto para correção gramatical...",
+  "scientific-language": "Cole o texto informal ou coloquial para adequar ao padrão científico...",
+  translate: "Cole o texto e indique: traduzir para PT ou EN...",
+  "expand-text": "Cole o parágrafo ou seção que precisa expandir (informe meta de extensão se quiser)...",
+  fichamento: "Envie PDF/Word ou cole o artigo/livro para fichamento analítico...",
+  "literature-synthesis": "Cole resumos, fichamentos ou trechos de vários artigos sobre o mesmo tema...",
+  "research-gap": "Cole sua revisão bibliográfica ou descreva o tema para identificar lacunas...",
+  "article-search": "Descreva o tema da pesquisa e o curso — geramos estratégia de busca...",
+  "research-theme": "Informe seu curso, área de interesse e restrições (tempo, acesso a dados)...",
+  "research-problem": "Descreva o tema delimitado para formular problema e objetivos...",
+  "methodology-builder": "Descreva tema, tipo de pesquisa pretendida e contexto (curso, prazo)...",
+  "tcc-structure": "Descreva tema, curso, tipo de pesquisa e orientações da instituição...",
+  "case-study": "Envie PDF/Word, cole o material ou descreva o caso...",
+  "slides-builder": "Cole o conteúdo do trabalho ou descreva o tema da apresentação...",
+  "defense-sim": "Cole resumo do TCC (introdução, metodologia, resultados) para simular a banca...",
 };
 
 export default async function ToolPage({
@@ -24,11 +42,12 @@ export default async function ToolPage({
 }) {
   const { tool: toolId } = await params;
   const tool = getToolById(toolId);
-  const pageConfig = toolPages[toolId];
 
-  if (!tool || !pageConfig) notFound();
+  if (!tool) notFound();
 
   const Icon = tool.icon;
+  const placeholder =
+    placeholders[toolId] ?? "Envie PDF/Word ou cole o conteúdo aqui...";
 
   return (
     <div>
@@ -41,7 +60,7 @@ export default async function ToolPage({
           <p className="text-sm text-zinc-500">{tool.description}</p>
         </div>
       </div>
-      <ToolRunner toolId={toolId} placeholder={pageConfig.placeholder} />
+      <ToolRunner toolId={toolId} placeholder={placeholder} />
     </div>
   );
 }

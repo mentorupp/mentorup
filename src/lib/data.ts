@@ -716,7 +716,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "Vocês atendem todas as áreas do conhecimento?",
     answer:
-      "Atendemos mais de 80 cursos de graduação e pós-graduação, incluindo áreas de exatas, humanas, biológicas, saúde, engenharias e tecnologia. Se sua área for muito específica, consulte-nos antes.",
+      "Atendemos cursos de Saúde (Medicina, Enfermagem, Farmácia, Fisioterapia, Nutrição e afins) e Psicologia & Humanas (Psicologia, Serviço Social, Pedagogia, Sociologia e afins). Consultoria e ferramentas IA são pensadas para essas áreas.",
   },
   {
     question: "Como funciona o pagamento?",

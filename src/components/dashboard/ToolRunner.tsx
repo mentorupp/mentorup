@@ -145,8 +145,8 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
           <MindMapViewer data={result as { title: string; nodes: { id: string; label: string; type: string; parent?: string }[] }} />
         ) : null}
 
-        {result && tool.id === "pdf-quiz" && typeof result === "object" ? (
-          <QuizViewer data={result as { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string; rubric?: string; points?: number }>> }} />
+        {result && (tool.id === "pdf-quiz" || tool.id === "defense-sim") && typeof result === "object" ? (
+          <QuizViewer data={result as { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string; rubric?: string; points?: number; category?: string; suggestedAnswer?: string; tips?: string }>> }} />
         ) : null}
 
         {result && tool.id === "flashcards" && typeof result === "object" ? (
@@ -157,7 +157,7 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
           <QuizViewer data={(result as { exam?: { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string }>> } }).exam ?? (result as { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string }>> })} />
         ) : null}
 
-        {result && !["mind-map", "pdf-quiz", "flashcards", "exam-sim"].includes(tool.id) && (
+        {result && !["mind-map", "pdf-quiz", "flashcards", "exam-sim", "defense-sim"].includes(tool.id) && (
           <div className="prose prose-sm max-w-none prose-headings:font-display">
             <ReactMarkdown>
               {typeof result === "string" ? result : JSON.stringify(result, null, 2)}
