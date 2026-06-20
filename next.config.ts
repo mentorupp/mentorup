@@ -4,6 +4,7 @@ import path from "path";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: path.join(process.cwd()),
+  serverExternalPackages: ["pdf-parse", "@napi-rs/canvas"],
   async redirects() {
     return [
       { source: "/servicos", destination: "/consultoria", permanent: true },

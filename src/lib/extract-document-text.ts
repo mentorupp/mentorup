@@ -1,4 +1,10 @@
 import mammoth from "mammoth";
+import { getData } from "pdf-parse/worker";
+import {
+  InvalidPDFException,
+  PasswordException,
+  PDFParse,
+} from "pdf-parse";
 
 export class DocumentExtractError extends Error {
   constructor(message: string) {
@@ -7,14 +13,55 @@ export class DocumentExtractError extends Error {
   }
 }
 
+let pdfWorkerReady = false;
+
+function ensurePdfWorker() {
+  if (!pdfWorkerReady) {
+    // Inline worker — funciona no Windows local e no Vercel (serverless).
+    PDFParse.setWorker(getData());
+    pdfWorkerReady = true;
+  }
+}
+
 function extension(fileName: string): string {
   const parts = fileName.split(".");
   return parts.length > 1 ? parts.pop()!.toLowerCase() : "";
 }
 
+function mapPdfError(error: unknown): DocumentExtractError {
+  if (error instanceof DocumentExtractError) {
+    return error;
+  }
+
+  if (error instanceof PasswordException) {
+    return new DocumentExtractError(
+      "Este PDF está protegido por senha. Remova a senha no leitor de PDF ou cole o texto manualmente."
+    );
+  }
+
+  if (error instanceof InvalidPDFException) {
+    return new DocumentExtractError(
+      "Arquivo PDF inválido ou corrompido. Tente exportar novamente ou cole o texto."
+    );
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (/fake worker|workerSrc|GlobalWorkerOptions/i.test(message)) {
+    return new DocumentExtractError(
+      "Falha ao processar o PDF no servidor. Cole o texto manualmente ou tente um PDF exportado do Word/Google Docs."
+    );
+  }
+
+  return new DocumentExtractError(
+    "Não foi possível ler este PDF. Tente outro arquivo ou cole o texto manualmente."
+  );
+}
+
 async function extractPdf(buffer: Buffer): Promise<string> {
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer });
+  ensurePdfWorker();
+
+  const parser = new PDFParse({ data: new Uint8Array(buffer) });
 
   try {
     const data = await parser.getText();
@@ -26,6 +73,8 @@ async function extractPdf(buffer: Buffer): Promise<string> {
     }
 
     return data.text.trim();
+  } catch (error) {
+    throw mapPdfError(error);
   } finally {
     await parser.destroy();
   }
