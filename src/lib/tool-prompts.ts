@@ -36,7 +36,7 @@ export const TOOL_PROMPTS: Record<string, { system: string; json?: boolean }> = 
   },
   "exam-sim": {
     system:
-      "Crie um simulado de prova completo em JSON: { exam: { title, duration, questions: [{ type, question, options?, answer?, points }] } }. Mínimo 10 questões variadas. Responda APENAS JSON em português.",
+      "Crie um simulado de prova em JSON: { exam: { title, duration, questions: [{ type: 'objective'|'discursive', question, options?, answer?, points, explanation? }] } }. Gere 6 a 8 questões objetivas e dissertativas com base no material. Responda APENAS JSON válido em português.",
     json: true,
   },
   "case-study": {
