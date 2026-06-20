@@ -17,6 +17,7 @@ export default function AreaDetailPage() {
   const [selectedTool, setSelectedTool] = useState(area?.tools[0]?.id ?? "");
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
+  const [demoNotice, setDemoNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { update } = useSession();
@@ -37,6 +38,7 @@ export default function AreaDetailPage() {
 
     setLoading(true);
     setError("");
+    setDemoNotice("");
 
     try {
       const res = await fetch("/api/tools/area", {
@@ -56,6 +58,9 @@ export default function AreaDetailPage() {
       }
 
       setResult(data.result);
+      if (data.demo && data.demoReason) {
+        setDemoNotice(data.demoReason);
+      }
       await update({ credits: data.creditsRemaining });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro");
@@ -129,6 +134,11 @@ export default function AreaDetailPage() {
 
         <div className="rounded-2xl border border-surface-200 bg-white p-6">
           <h2 className="font-display mb-4 font-bold">Resultado</h2>
+          {demoNotice && (
+            <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              {demoNotice}
+            </p>
+          )}
           {result ? (
             <div className="prose prose-sm max-h-[500px] max-w-none overflow-y-auto">
               <ReactMarkdown>{result}</ReactMarkdown>

@@ -1,12 +1,14 @@
-import OpenAI from "openai";
+import OpenAI, { APIError } from "openai";
 
 const openai = process.env.OPENAI_API_KEY?.trim()
   ? new OpenAI({
       apiKey: process.env.OPENAI_API_KEY.trim(),
       timeout: 55_000,
-      maxRetries: 1,
+      maxRetries: 0,
     })
   : null;
+
+const RETRY_DELAYS_MS = [0, 2_000, 5_000];
 
 export class AIError extends Error {
   constructor(message: string) {
@@ -14,6 +16,12 @@ export class AIError extends Error {
     this.name = "AIError";
   }
 }
+
+export type AIResult = {
+  text: string;
+  demo: boolean;
+  demoReason?: string;
+};
 
 export function isOpenAIConfigured(): boolean {
   return Boolean(openai);
@@ -26,16 +34,67 @@ export function parseAIJsonResult(result: string): unknown {
   return JSON.parse(jsonStr);
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function openAIErrorMeta(error: APIError) {
+  const payload = error.error as { code?: string; type?: string } | undefined;
+  const code = payload?.code ?? "";
+  const message = error.message ?? "";
+
+  const isQuota =
+    code === "insufficient_quota" ||
+    /exceeded your current quota|insufficient_quota|check your plan and billing/i.test(
+      message
+    );
+
+  const isRateLimit =
+    !isQuota &&
+    (code === "rate_limit_exceeded" ||
+      error.status === 429 ||
+      /rate limit/i.test(message));
+
+  return { isQuota, isRateLimit, code, message };
+}
+
+function demoReasonFromError(error: unknown): string {
+  if (error instanceof APIError) {
+    const { isQuota, isRateLimit } = openAIErrorMeta(error);
+    if (isQuota) {
+      return "A conta OpenAI do servidor está sem saldo. Adicione créditos em platform.openai.com/settings/billing. Enquanto isso, geramos uma prévia local do material.";
+    }
+    if (isRateLimit) {
+      return "A OpenAI limitou requisições momentâneas. Geramos uma prévia local — tente de novo em 1 minuto para resposta completa.";
+    }
+  }
+  return "A IA externa falhou. Geramos uma prévia local com base no seu material.";
+}
+
+function shouldFallbackToDemo(error: unknown): boolean {
+  if (error instanceof APIError) {
+    const { isQuota, isRateLimit } = openAIErrorMeta(error);
+    return isQuota || isRateLimit;
+  }
+  return false;
+}
+
 function mapOpenAIError(error: unknown): AIError {
-  if (error instanceof OpenAI.APIError) {
+  if (error instanceof APIError) {
     if (error.status === 401) {
       return new AIError(
         "Chave da OpenAI inválida no servidor. Verifique OPENAI_API_KEY na Vercel e faça redeploy."
       );
     }
     if (error.status === 429) {
+      const { isQuota } = openAIErrorMeta(error);
+      if (isQuota) {
+        return new AIError(
+          "Saldo da OpenAI esgotado. Adicione créditos em platform.openai.com/settings/billing e tente novamente."
+        );
+      }
       return new AIError(
-        "Limite de uso da IA atingido. Aguarde alguns minutos e tente novamente."
+        "Muitas requisições seguidas à OpenAI. Aguarde 1 minuto e tente novamente."
       );
     }
     if (error.status === 503 || error.status === 500) {
@@ -58,12 +117,20 @@ function mapOpenAIError(error: unknown): AIError {
   );
 }
 
-export async function generateAI(
+async function callOpenAI(
   systemPrompt: string,
   userPrompt: string,
-  json = false
+  json: boolean
 ): Promise<string> {
-  if (openai) {
+  if (!openai) throw new AIError("OpenAI não configurada.");
+
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < RETRY_DELAYS_MS.length; attempt++) {
+    if (RETRY_DELAYS_MS[attempt]) {
+      await sleep(RETRY_DELAYS_MS[attempt]);
+    }
+
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -72,7 +139,7 @@ export async function generateAI(
           { role: "user", content: userPrompt.slice(0, 12_000) },
         ],
         temperature: 0.6,
-        max_tokens: json ? 4_096 : 3_000,
+        max_tokens: json ? 2_500 : 2_000,
         ...(json ? { response_format: { type: "json_object" } } : {}),
       });
 
@@ -85,12 +152,164 @@ export async function generateAI(
 
       return content;
     } catch (error) {
+      lastError = error;
       if (error instanceof AIError) throw error;
-      throw mapOpenAIError(error);
+
+      if (error instanceof APIError) {
+        const { isQuota, isRateLimit } = openAIErrorMeta(error);
+        if (isQuota) throw error;
+        if (isRateLimit && attempt < RETRY_DELAYS_MS.length - 1) continue;
+      }
+
+      throw error;
     }
   }
 
-  return generateDemoResponse(systemPrompt, userPrompt, json);
+  throw lastError;
+}
+
+export async function generateAI(
+  systemPrompt: string,
+  userPrompt: string,
+  json = false
+): Promise<AIResult> {
+  if (!openai) {
+    return {
+      text: generateDemoResponse(systemPrompt, userPrompt, json),
+      demo: true,
+      demoReason: "OpenAI não configurada no servidor — prévia local ativa.",
+    };
+  }
+
+  try {
+    const text = await callOpenAI(systemPrompt, userPrompt, json);
+    return { text, demo: false };
+  } catch (error) {
+    if (shouldFallbackToDemo(error)) {
+      console.warn("OpenAI indisponível, usando prévia local:", error);
+      return {
+        text: generateDemoResponse(systemPrompt, userPrompt, json),
+        demo: true,
+        demoReason: demoReasonFromError(error),
+      };
+    }
+
+    if (error instanceof AIError) throw error;
+    throw mapOpenAIError(error);
+  }
+}
+
+export type VisionImage = {
+  base64: string;
+  mimeType: string;
+};
+
+async function callOpenAIVision(
+  systemPrompt: string,
+  userPrompt: string,
+  images: VisionImage[],
+  json: boolean
+): Promise<string> {
+  if (!openai) throw new AIError("OpenAI não configurada.");
+
+  const imageParts = images.map((img) => ({
+    type: "image_url" as const,
+    image_url: {
+      url: `data:${img.mimeType};base64,${img.base64}`,
+      detail: "high" as const,
+    },
+  }));
+
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < RETRY_DELAYS_MS.length; attempt++) {
+    if (RETRY_DELAYS_MS[attempt]) {
+      await sleep(RETRY_DELAYS_MS[attempt]);
+    }
+
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: [{ type: "text", text: userPrompt }, ...imageParts],
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: json ? 3_000 : 2_000,
+        ...(json ? { response_format: { type: "json_object" } } : {}),
+      });
+
+      const content = response.choices[0]?.message?.content?.trim();
+      if (!content) {
+        throw new AIError(
+          "Não foi possível ler a prova na imagem. Tente uma foto mais nítida ou com melhor iluminação."
+        );
+      }
+
+      return content;
+    } catch (error) {
+      lastError = error;
+      if (error instanceof AIError) throw error;
+
+      if (error instanceof APIError) {
+        const { isQuota, isRateLimit } = openAIErrorMeta(error);
+        if (isQuota) throw error;
+        if (isRateLimit && attempt < RETRY_DELAYS_MS.length - 1) continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError;
+}
+
+export async function generateAIVision(
+  systemPrompt: string,
+  userPrompt: string,
+  images: VisionImage[],
+  json = false
+): Promise<AIResult> {
+  if (!openai) {
+    return {
+      text: generateDemoResponse(systemPrompt, userPrompt, json),
+      demo: true,
+      demoReason: "OpenAI não configurada — prévia local. Configure a chave para corrigir fotos de verdade.",
+    };
+  }
+
+  try {
+    const text = await callOpenAIVision(systemPrompt, userPrompt, images, json);
+    return { text, demo: false };
+  } catch (error) {
+    if (shouldFallbackToDemo(error)) {
+      console.warn("OpenAI vision indisponível, usando prévia local:", error);
+      return {
+        text: generateDemoResponse(systemPrompt, userPrompt, json),
+        demo: true,
+        demoReason: demoReasonFromError(error),
+      };
+    }
+
+    if (error instanceof AIError) throw error;
+    throw mapOpenAIError(error);
+  }
+}
+
+function extractTopicLines(userPrompt: string): string[] {
+  return userPrompt
+    .split(/\n/)
+    .map((line) =>
+      line
+        .replace(/\.{2,}.*$/, "")
+        .replace(/\s+\d+\s*$/, "")
+        .trim()
+    )
+    .filter((line) => line.length > 12 && line.length < 140 && !/^[\d.\s]+$/.test(line))
+    .slice(0, 6);
 }
 
 function generateDemoResponse(
@@ -100,6 +319,7 @@ function generateDemoResponse(
 ): string {
   const topic =
     userPrompt.slice(0, 200).replace(/\n/g, " ").trim() || "conteúdo acadêmico";
+  const topicLines = extractTopicLines(userPrompt);
 
   if (systemPrompt.includes("mapa mental") || systemPrompt.includes("mind map")) {
     const data = {
@@ -120,39 +340,68 @@ function generateDemoResponse(
     return JSON.stringify(data);
   }
 
+  if (systemPrompt.includes("corrigindo provas")) {
+    const items = [1, 2, 3].map((n) => ({
+      number: String(n),
+      type: n === 3 ? "discursive" : "objective",
+      question: `Questão ${n} identificada na imagem enviada`,
+      studentAnswer: n === 1 ? "B" : n === 2 ? "A" : "Resposta parcial do aluno",
+      correctAnswer: n === 1 ? "C" : n === 2 ? "A" : "Resposta esperada com fundamentação teórica",
+      isCorrect: n === 2,
+      ...(userPrompt.includes("explicações") || userPrompt.includes("explicacao")
+        ? {
+            explanation:
+              "Prévia local — conecte saldo na OpenAI para correção real da foto enviada.",
+          }
+        : {}),
+    }));
+
+    return JSON.stringify({
+      summary: {
+        title: "Prévia — Correção de Prova",
+        totalQuestions: 3,
+        correctCount: 1,
+        note: "Modo demonstração. Com créditos OpenAI, a IA lê a foto e corrige de verdade.",
+      },
+      items,
+    });
+  }
+
   if (systemPrompt.includes("simulado de prova")) {
+    const questionTopics =
+      topicLines.length > 0
+        ? topicLines
+        : [topic.slice(0, 80), "Metodologia e fundamentação teórica", "Análise e conclusões"];
+
+    const questions = questionTopics.slice(0, 6).map((label, index) => {
+      if (index % 3 === 2) {
+        return {
+          type: "discursive",
+          question: `Discuta os aspectos centrais de "${label}" com base no material enviado.`,
+          points: 2,
+        };
+      }
+
+      return {
+        type: "objective",
+        question: `Sobre "${label}", qual alternativa melhor reflete o conteúdo estudado?`,
+        options: [
+          "Conceito alinhado ao material",
+          "Interpretação parcialmente correta",
+          "Afirmação incorreta",
+          "Informação não abordada no texto",
+        ],
+        answer: 0,
+        points: 1,
+        explanation: "Baseado nos trechos identificados no material enviado.",
+      };
+    });
+
     const data = {
       exam: {
-        title: `Simulado — ${topic.slice(0, 50)}`,
+        title: `Simulado — ${topicLines[0]?.slice(0, 60) ?? topic.slice(0, 50)}`,
         duration: "90 minutos",
-        questions: [
-          {
-            type: "objective",
-            question: `Qual é o tema central abordado em "${topic.slice(0, 60)}"?`,
-            options: [
-              "Conceito A — definição primária",
-              "Conceito B — abordagem alternativa",
-              "Conceito C — visão complementar",
-              "Conceito D — perspectiva crítica",
-            ],
-            answer: 0,
-            points: 1,
-            explanation: "Alternativa correta com base no material analisado.",
-          },
-          {
-            type: "objective",
-            question: "Qual abordagem metodológica é mais adequada para este tema?",
-            options: ["Quantitativa", "Qualitativa", "Mista", "Experimental"],
-            answer: 2,
-            points: 1,
-            explanation: "A abordagem mista integra métodos quantitativos e qualitativos.",
-          },
-          {
-            type: "discursive",
-            question: "Discuta as principais implicações teóricas e práticas do conteúdo estudado.",
-            points: 3,
-          },
-        ],
+        questions,
       },
     };
     return JSON.stringify(data);
@@ -195,28 +444,21 @@ function generateDemoResponse(
   }
 
   if (systemPrompt.includes("flashcard")) {
-    const data = {
-      cards: [
-        { front: "Conceito principal", back: topic.slice(0, 150) },
-        {
-          front: "Definição-chave",
-          back: "Termo fundamental relacionado ao conteúdo estudado, essencial para compreensão do tema.",
-        },
-        {
-          front: "Aplicação prática",
-          back: "Como este conhecimento se aplica em contextos acadêmicos e profissionais.",
-        },
-        {
-          front: "Relação teórica",
-          back: "Conexão com teorias e autores relevantes na área de conhecimento.",
-        },
-        {
-          front: "Ponto de atenção",
-          back: "Aspecto crítico que frequentemente aparece em provas e avaliações.",
-        },
-      ],
-    };
-    return JSON.stringify(data);
+    const cards =
+      topicLines.length > 0
+        ? topicLines.map((line) => ({
+            front: line.slice(0, 80),
+            back: "Ponto relevante extraído do material enviado para revisão.",
+          }))
+        : [
+            { front: "Conceito principal", back: topic.slice(0, 150) },
+            {
+              front: "Definição-chave",
+              back: "Termo fundamental relacionado ao conteúdo estudado.",
+            },
+          ];
+
+    return JSON.stringify({ cards });
   }
 
   if (systemPrompt.includes("referência") || systemPrompt.includes("ABNT")) {
@@ -243,23 +485,18 @@ function generateDemoResponse(
     });
   }
 
-  return `## Resultado — MentorUp IA
+  const bulletPoints =
+    topicLines.length > 0
+      ? topicLines.map((line) => `- **${line.slice(0, 70)}**`).join("\n")
+      : "1. **Conceito central** — Identificado a partir do material enviado\n2. **Relações teóricas** — Conexões com a literatura da área\n3. **Aplicações práticas** — Uso em trabalhos e provas";
+
+  return `## Resultado — MentorUp (prévia local)
 
 **Tema analisado:** ${topic.slice(0, 120)}
 
-### Resumo
-Conteúdo processado com sucesso. Esta é uma resposta de demonstração — configure \`OPENAI_API_KEY\` no servidor para resultados completos e personalizados com IA avançada.
-
-### Pontos Principais
-1. **Conceito central** — Identificado a partir do material enviado
-2. **Relações teóricas** — Conexões com a literatura acadêmica da área
-3. **Aplicações práticas** — Como utilizar este conhecimento em trabalhos e provas
-
-### Recomendações
-- Revise o material original complementando com as sugestões acima
-- Use o Mapa Mental para visualizar as relações entre conceitos
-- Gere flashcards para fixar os termos-chave
+### Pontos do material
+${bulletPoints}
 
 ---
-*Modo demonstração ativo. Conecte OpenAI para resultados completos.*`;
+*Prévia gerada localmente. Configure saldo na OpenAI para respostas completas da IA.*`;
 }

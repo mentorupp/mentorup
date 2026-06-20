@@ -58,33 +58,35 @@ export async function POST(req: Request) {
       userPrompt += "\n\nOpções: " + JSON.stringify(options);
     }
 
-    const result = await generateAI(
+    const aiResult = await generateAI(
       promptConfig.system,
       userPrompt,
       promptConfig.json
     );
 
-    let parsed: string | Record<string, unknown> = result;
+    let parsed: string | Record<string, unknown> = aiResult.text;
     if (promptConfig.json) {
       try {
-        parsed = parseAIJsonResult(result) as Record<string, unknown>;
+        parsed = parseAIJsonResult(aiResult.text) as Record<string, unknown>;
       } catch {
-        parsed = { raw: result };
+        parsed = { raw: aiResult.text };
       }
     }
+
+    const creditCost = tool.freeUnlimited || aiResult.demo ? 0 : tool.credits;
 
     await checkAndDeductCredits(
       session.user.id,
       tool.type as ToolType,
-      tool.credits,
+      creditCost,
       title ?? tool.name,
-      { toolId, inputLength: input.length }
+      { toolId, inputLength: input.length, demo: aiResult.demo }
     );
 
     await logActivity("TOOL_USE", {
       userId: session.user.id,
       label: tool.name,
-      meta: { toolId, credits: tool.credits },
+      meta: { toolId, credits: creditCost, demo: aiResult.demo },
     });
 
     await prisma.savedItem.create({
@@ -94,8 +96,8 @@ export async function POST(req: Request) {
         title: title ?? `${tool.name} — ${new Date().toLocaleDateString("pt-BR")}`,
         content:
           typeof parsed === "string"
-            ? { text: parsed }
-            : (parsed as Prisma.InputJsonValue),
+            ? { text: parsed, demo: aiResult.demo }
+            : ({ ...parsed, demo: aiResult.demo } as Prisma.InputJsonValue),
       },
     });
 
@@ -107,6 +109,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       result: parsed,
       creditsRemaining: user?.credits ?? 0,
+      demo: aiResult.demo,
+      demoReason: aiResult.demoReason ?? null,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "CREDITS_INSUFFICIENT") {

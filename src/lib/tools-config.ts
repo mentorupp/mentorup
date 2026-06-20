@@ -21,6 +21,7 @@ import {
   Search,
   Sparkles,
   Stethoscope,
+  ScanLine,
 } from "lucide-react";
 
 export type { ToolGroup };
@@ -140,6 +141,18 @@ export const tools: ToolConfig[] = [
     credits: 3,
     href: "/dashboard/tools/exam-sim",
     category: "premium",
+    group: "estudo",
+    popular: true,
+  },
+  {
+    id: "exam-correction",
+    type: "EXAM_CORRECT",
+    name: "Correção de Prova",
+    description: "Tire foto ou envie imagem da prova — gabarito com ou sem explicação.",
+    icon: ScanLine,
+    credits: 2,
+    href: "/dashboard/tools/exam-correction",
+    category: "core",
     group: "estudo",
     popular: true,
   },

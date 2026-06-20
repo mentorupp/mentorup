@@ -1,4 +1,5 @@
 import ToolRunner from "@/components/dashboard/ToolRunner";
+import ExamCorrectionRunner from "@/components/dashboard/ExamCorrectionRunner";
 import { getToolById } from "@/lib/tools-config";
 import { notFound } from "next/navigation";
 
@@ -11,6 +12,7 @@ const placeholders: Record<string, string> = {
   flashcards: "Envie PDF/Word ou cole o material para gerar flashcards...",
   "pdf-quiz": "Envie PDF/Word ou cole o material para gerar questões de estudo...",
   "exam-sim": "Envie PDF/Word ou cole o material da disciplina para o simulado...",
+  "exam-correction": "Opcional: informe a matéria ou número das questões...",
   "exercise-solution": "Cole a lista de exercícios ou questões para resolução comentada...",
   "study-schedule": "Informe suas disciplinas, datas de provas e prazo do semestre...",
   "chat-pdf": "Envie PDF/Word ou cole o documento — inclua sua pergunta no início...",
@@ -60,7 +62,11 @@ export default async function ToolPage({
           <p className="text-sm text-zinc-500">{tool.description}</p>
         </div>
       </div>
-      <ToolRunner toolId={toolId} placeholder={placeholder} />
+      {toolId === "exam-correction" ? (
+        <ExamCorrectionRunner toolId={toolId} />
+      ) : (
+        <ToolRunner toolId={toolId} placeholder={placeholder} />
+      )}
     </div>
   );
 }

@@ -25,6 +25,7 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
   }
   const [input, setInput] = useState("");
   const [result, setResult] = useState<string | Record<string, unknown> | null>(null);
+  const [demoNotice, setDemoNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { data: session, update } = useSession();
@@ -43,6 +44,7 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
 
     setLoading(true);
     setError("");
+    setDemoNotice("");
     setResult(null);
 
     try {
@@ -60,6 +62,9 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
       }
 
       setResult(data.result);
+      if (data.demo && data.demoReason) {
+        setDemoNotice(data.demoReason);
+      }
       await update({ credits: data.creditsRemaining });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
@@ -127,6 +132,12 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
 
       <div className="rounded-2xl border border-surface-200 bg-white p-6">
         <h2 className="font-display mb-4 text-lg font-bold">Resultado</h2>
+
+        {demoNotice && (
+          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            {demoNotice}
+          </p>
+        )}
 
         {!result && !loading && (
           <div className="flex h-64 flex-col items-center justify-center text-center text-zinc-400">

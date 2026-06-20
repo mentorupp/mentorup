@@ -131,6 +131,7 @@ export default async function BillingPage() {
             ["Referências ABNT", "Grátis"],
             ["Ferramentas por Área", "2-4 créditos"],
             ["Simulador de Prova", "3 créditos"],
+            ["Correção de Prova (foto)", "2 créditos"],
             ["Chat com Documento", "1 crédito"],
           ].map(([name, cost]) => (
             <div key={name} className="flex justify-between rounded-lg bg-surface-50 px-4 py-2 text-sm">

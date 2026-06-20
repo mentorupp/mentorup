@@ -39,6 +39,11 @@ export const TOOL_PROMPTS: Record<string, { system: string; json?: boolean }> = 
       "Crie um simulado de prova em JSON: { exam: { title, duration, questions: [{ type: 'objective'|'discursive', question, options?, answer?, points, explanation? }] } }. Gere 6 a 8 questões objetivas e dissertativas com base no material. Responda APENAS JSON válido em português.",
     json: true,
   },
+  "exam-correction": {
+    system:
+      "Você é professor universitário corrigindo provas. Analise as imagens da prova ou simulado. Identifique cada questão visível, a resposta marcada ou escrita pelo aluno (se houver) e a resposta correta. Responda APENAS JSON válido em português: { summary: { title?, totalQuestions, correctCount?, note? }, items: [{ number, type: 'objective'|'discursive', question, studentAnswer?, correctAnswer, isCorrect?, explanation? }] }. Se o aluno não marcou resposta, informe apenas o gabarito correto.",
+    json: true,
+  },
   "case-study": {
     system:
       "Estruture um estudo de caso acadêmico completo: contexto, problema, análise, alternativas, recomendação e referências sugeridas. Responda em markdown em português.",

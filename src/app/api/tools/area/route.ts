@@ -45,14 +45,16 @@ export async function POST(req: Request) {
       areaTool.systemPrompt ??
       `Você é especialista em ${area.name}. Ferramenta: ${areaTool.name}. Contexto: ${areaTool.promptHint}. ${areaTool.description}. Responda em markdown estruturado em português, com rigor acadêmico.`;
 
-    const result = await generateAI(system, input);
+    const aiResult = await generateAI(system, input);
+
+    const creditCost = aiResult.demo ? 0 : areaTool.credits;
 
     await checkAndDeductCredits(
       session.user.id,
       "AREA_TOOL",
-      areaTool.credits,
+      creditCost,
       title ?? areaTool.name,
-      { areaSlug, toolId }
+      { areaSlug, toolId, demo: aiResult.demo }
     );
 
     await prisma.savedItem.create({
@@ -60,7 +62,12 @@ export async function POST(req: Request) {
         userId: session.user.id,
         tool: "AREA_TOOL",
         title: title ?? `${areaTool.name} — ${new Date().toLocaleDateString("pt-BR")}`,
-        content: { text: result, area: area.name, tool: areaTool.name },
+        content: {
+          text: aiResult.text,
+          area: area.name,
+          tool: areaTool.name,
+          demo: aiResult.demo,
+        },
       },
     });
 
@@ -70,8 +77,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({
-      result,
+      result: aiResult.text,
       creditsRemaining: updated?.credits ?? 0,
+      demo: aiResult.demo,
+      demoReason: aiResult.demoReason ?? null,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "CREDITS_INSUFFICIENT") {
