@@ -12,7 +12,7 @@ import DocumentUploadZone from "./DocumentUploadZone";
 import MindMapViewer from "./MindMapViewer";
 import { normalizeMindMapData, type RawMindMapData } from "@/lib/mind-map";
 import QuizViewer from "./QuizViewer";
-import { normalizeQuizData, type RawQuizData } from "@/lib/quiz-normalize";
+import { normalizeExamSimData, normalizeQuizData, type RawExamSimData, type RawQuizData } from "@/lib/quiz-normalize";
 import FlashcardViewer from "./FlashcardViewer";
 import CitationsViewer from "./CitationsViewer";
 import ChatPdfViewer from "./ChatPdfViewer";
@@ -63,8 +63,10 @@ function ToolResult({
     case "exam-sim":
       return (
         <QuizViewer
-          data={normalizeQuizData(
-            ((result as { exam?: RawQuizData }).exam ?? result) as RawQuizData
+          data={normalizeExamSimData(
+            ((result as { exam?: RawQuizData }).exam
+              ? (result as RawExamSimData)
+              : { exam: result as RawQuizData }) as RawExamSimData
           )}
         />
       );

@@ -3,6 +3,7 @@ import ExamCorrectionRunner from "@/components/dashboard/ExamCorrectionRunner";
 import StudyScheduleRunner from "@/components/dashboard/StudyScheduleRunner";
 import ReferencesRunner from "@/components/dashboard/ReferencesRunner";
 import SlidesRunner from "@/components/dashboard/SlidesRunner";
+import ChatPdfRunner from "@/components/dashboard/ChatPdfRunner";
 import { getToolById } from "@/lib/tools-config";
 import { notFound } from "next/navigation";
 
@@ -18,7 +19,7 @@ const placeholders: Record<string, string> = {
   "exam-correction": "Opcional: informe a matéria ou número das questões...",
   "exercise-solution": "Cole a lista de exercícios ou questões para resolução comentada...",
   "study-schedule": "Ex.: Psicologia — Ansiedade e estresse (caps. 3-5). Prova dia 15/08. Inclua revisão e simulado...",
-  "chat-pdf": "Envie PDF/Word ou cole o documento — inclua sua pergunta no início...",
+  "chat-pdf": "Cole o texto do documento abaixo ou use o upload — sua pergunta vai no campo dedicado acima.",
   references: "Cole DOI, URL, bibliografia ou capa do trabalho (autor, título, ano, cidade)...",
   citations: "Cole o trecho a citar e os dados da fonte (autor, ano, página)...",
   "abnt-format": "Cole trechos do trabalho ou descreva o que precisa formatar (capa, citações, referências)...",
@@ -73,6 +74,8 @@ export default async function ToolPage({
         <ReferencesRunner toolId={toolId} placeholder={placeholder} />
       ) : toolId === "slides-builder" ? (
         <SlidesRunner toolId={toolId} placeholder={placeholder} />
+      ) : toolId === "chat-pdf" ? (
+        <ChatPdfRunner toolId={toolId} />
       ) : (
         <ToolRunner toolId={toolId} placeholder={placeholder} />
       )}

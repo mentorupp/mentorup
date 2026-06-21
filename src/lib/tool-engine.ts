@@ -14,9 +14,13 @@ import {
   type RawMindMapData,
 } from "@/lib/mind-map";
 import {
+  buildQuizUserPrompt,
+  getExamSimAIOptions,
   getQuizAIOptions,
+  normalizeExamSimData,
   normalizeQuizData,
   PDF_QUIZ_TOOL_ID,
+  type RawExamSimData,
   type RawQuizData,
 } from "@/lib/quiz-normalize";
 import {
@@ -54,7 +58,13 @@ import {
   getSummarizeAIOptions,
   SUMMARIZE_TOOL_ID,
 } from "@/lib/summarize-material";
-import { USER_MATERIAL_SUFFIX } from "@/lib/ai-config";
+import {
+  buildChatPdfUserPrompt,
+  extractChatPdfQuestion,
+  getChatPdfAIOptions,
+  CHAT_PDF_TOOL_ID,
+} from "@/lib/chat-pdf";
+import { getUserPromptSuffix, resolveAIOptions } from "@/lib/ai-config";
 import { TOOL_PROMPTS } from "@/lib/tool-prompts";
 
 export const TEXT_TRANSFORM_TOOLS = new Set([
@@ -95,12 +105,22 @@ export function prepareToolRequest(
   const promptConfig = TOOL_PROMPTS[toolId];
   const isJson = promptConfig?.json ?? false;
 
-  if (options && Object.keys(options).length > 0) {
+  if (options && Object.keys(options).length > 0 && toolId !== CHAT_PDF_TOOL_ID) {
     userPrompt += "\n\nOpções: " + JSON.stringify(options);
   }
 
   if (toolId === SUMMARIZE_TOOL_ID) {
     userPrompt = buildSummarizeUserPrompt(userPrompt);
+  } else if (toolId === CHAT_PDF_TOOL_ID) {
+    const q = options?.question?.trim() || extractChatPdfQuestion(input);
+    const doc = input.includes("DOCUMENTO:")
+      ? input.split(/DOCUMENTO:\s*/i)[1]?.trim() ?? input
+      : input;
+    if (q) {
+      userPrompt = buildChatPdfUserPrompt({ question: q, document: doc });
+    }
+  } else if (toolId === PDF_QUIZ_TOOL_ID || toolId === "exam-sim") {
+    userPrompt = buildQuizUserPrompt(userPrompt, toolId);
   } else if (!isJson && !TEXT_TRANSFORM_TOOLS.has(toolId)) {
     userPrompt += USER_MATERIAL_SUFFIX;
   } else if (TEXT_TRANSFORM_TOOLS.has(toolId)) {
@@ -118,9 +138,11 @@ export function prepareToolRequest(
       ? getSummarizeAIOptions(input)
       : toolId === MIND_MAP_TOOL_ID
         ? getMindMapAIOptions(input)
-        : toolId === PDF_QUIZ_TOOL_ID || toolId === "exam-sim"
+        : toolId === PDF_QUIZ_TOOL_ID
           ? getQuizAIOptions(input)
-          : toolId === STUDY_SCHEDULE_TOOL_ID
+          : toolId === "exam-sim"
+            ? getExamSimAIOptions(input)
+            : toolId === STUDY_SCHEDULE_TOOL_ID
             ? getStudyScheduleAIOptions(scheduleWeeks)
             : toolId === REFERENCES_TOOL_ID
               ? getReferencesAIOptions(estimateSourceCount(input))
@@ -128,8 +150,8 @@ export function prepareToolRequest(
                 ? getSlidesAIOptions(slideCount)
                 : toolId === "citations"
                   ? { toolId, temperature: 0.15, maxTokens: 5000 }
-                  : toolId === "chat-pdf"
-                    ? { toolId, temperature: 0.25, maxTokens: 4000 }
+                  : toolId === CHAT_PDF_TOOL_ID
+                    ? getChatPdfAIOptions()
                     : toolId === "explain-content"
                       ? {
                           toolId,
@@ -170,12 +192,12 @@ export function postProcessToolResult(
     case MIND_MAP_TOOL_ID:
       return normalizeMindMapData(parsed as RawMindMapData) as unknown as Record<string, unknown>;
     case PDF_QUIZ_TOOL_ID:
+      return normalizeQuizData(parsed as RawQuizData) as unknown as Record<string, unknown>;
     case "exam-sim":
-      return normalizeQuizData(
-        toolId === "exam-sim" && parsed.exam
-          ? (parsed.exam as RawQuizData)
-          : (parsed as RawQuizData)
-      ) as unknown as Record<string, unknown>;
+      return normalizeExamSimData(parsed as RawExamSimData) as unknown as Record<
+        string,
+        unknown
+      >;
     case STUDY_SCHEDULE_TOOL_ID:
       return normalizeStudySchedule(parsed as RawStudyScheduleData) as unknown as Record<
         string,
@@ -193,8 +215,14 @@ export function postProcessToolResult(
       >;
     case "citations":
       return normalizeCitations(parsed as RawCitations) as unknown as Record<string, unknown>;
-    case "chat-pdf":
-      return normalizeChatPdf(parsed as RawChatPdf) as unknown as Record<string, unknown>;
+    case CHAT_PDF_TOOL_ID: {
+      const normalized = normalizeChatPdf(parsed as RawChatPdf);
+      const userQuestion = options?.question?.trim();
+      if (userQuestion) {
+        return { ...normalized, question: userQuestion } as unknown as Record<string, unknown>;
+      }
+      return normalized as unknown as Record<string, unknown>;
+    }
     case "explain-content":
       return normalizeExplainContent(parsed as RawExplainContent) as unknown as Record<
         string,
@@ -222,6 +250,27 @@ export function postProcessToolResult(
     default:
       return parsed;
   }
+}
+
+export function validateToolRequest(
+  toolId: string,
+  input: string,
+  options?: Record<string, string>
+): string | null {
+  if (toolId === CHAT_PDF_TOOL_ID) {
+    const question =
+      options?.question?.trim() || extractChatPdfQuestion(input);
+    if (!question || question.length < 5) {
+      return "Digite sua pergunta sobre o documento (mínimo 5 caracteres).";
+    }
+    const doc = input.includes("DOCUMENTO:")
+      ? input.split(/DOCUMENTO:\s*/i)[1]?.trim()
+      : input.trim();
+    if (!doc || doc.length < 20) {
+      return "Anexe ou cole o documento com pelo menos 20 caracteres.";
+    }
+  }
+  return null;
 }
 
 export function getResultCopyLabel(toolId: string): string {

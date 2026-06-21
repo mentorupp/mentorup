@@ -6,7 +6,17 @@ export default function ChatPdfViewer({ data }: { data: ReturnType<typeof normal
   if (!data.answer) {
     return (
       <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        Não foi possível responder. Inclua sua pergunta no início do texto e cole o documento.
+        {data.question
+          ? "Não foi possível encontrar uma resposta no documento para essa pergunta."
+          : "Digite sua pergunta no campo dedicado antes de gerar."}
+      </p>
+    );
+  }
+
+  if (!data.question) {
+    return (
+      <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        Pergunta não informada. Use o campo &quot;Sua pergunta&quot; antes de gerar.
       </p>
     );
   }

@@ -60,9 +60,9 @@ function MindMapNodeComponent({ data }: NodeProps) {
         boxShadow: style.shadow,
       }}
     >
-      <Handle type="target" position={Position.Top} style={handleStyle} />
+      <Handle type="target" position={Position.Left} style={handleStyle} />
       <p className={`${style.text} break-words hyphens-auto`}>{nodeData.label}</p>
-      <Handle type="source" position={Position.Bottom} style={handleStyle} />
+      <Handle type="source" position={Position.Right} style={handleStyle} />
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { checkAndDeductCredits } from "@/lib/credits";
 import { prisma } from "@/lib/prisma";
 import { getToolById } from "@/lib/tools-config";
 import { TOOL_PROMPTS } from "@/lib/tool-prompts";
-import { postProcessToolResult, prepareToolRequest } from "@/lib/tool-engine";
+import { postProcessToolResult, prepareToolRequest, validateToolRequest } from "@/lib/tool-engine";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -52,6 +52,11 @@ export async function POST(req: Request) {
           { status: 402 }
         );
       }
+    }
+
+    const validationError = validateToolRequest(toolId, input, options);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
     const { userPrompt, aiOptions } = prepareToolRequest(toolId, input, options);

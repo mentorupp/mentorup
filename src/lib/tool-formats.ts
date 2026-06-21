@@ -111,9 +111,9 @@ export function normalizeCitations(raw: RawCitations) {
   };
 }
 
-export function normalizeChatPdf(raw: RawChatPdf) {
+export function normalizeChatPdf(raw: RawChatPdf, userQuestion?: string) {
   return {
-    question: raw.question?.trim() || "Pergunta",
+    question: userQuestion?.trim() || raw.question?.trim() || "",
     answer: raw.answer?.trim() || "",
     excerpts: (raw.excerpts ?? [])
       .filter((e) => e.quote?.trim())

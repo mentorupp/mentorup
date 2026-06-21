@@ -17,7 +17,7 @@ import { toPng } from "html-to-image";
 import { Check, Download, Loader2, Maximize2, Minimize2 } from "lucide-react";
 import "@xyflow/react/dist/style.css";
 import MindMapNode from "./MindMapNode";
-import { toFlowElements, type MindMapData } from "@/lib/mind-map";
+import { toFlowElements, getTreeDepth, type MindMapData } from "@/lib/mind-map";
 
 const nodeTypes: NodeTypes = {
   mindMap: MindMapNode,
@@ -124,10 +124,11 @@ function MindMapCanvas({ data }: { data: MindMapData }) {
   }, [layoutNodes, layoutEdges, setNodes, setEdges]);
 
   const stats = useMemo(() => {
-    const root = normalized.nodes.filter((n) => n.type === "root").length;
+    const rootNode = normalized.nodes.find((n) => n.type === "root");
+    const depth = rootNode ? getTreeDepth(normalized.nodes, rootNode.id) : 0;
     const branch = normalized.nodes.filter((n) => n.type === "branch").length;
     const leaf = normalized.nodes.filter((n) => n.type === "leaf").length;
-    return { total: normalized.nodes.length, root, branch, leaf };
+    return { total: normalized.nodes.length, depth, branch, leaf };
   }, [normalized.nodes]);
 
   return (
@@ -138,7 +139,8 @@ function MindMapCanvas({ data }: { data: MindMapData }) {
             {normalized.title}
           </h3>
           <p className="mt-1 text-xs text-zinc-500">
-            {stats.total} conceitos · {stats.branch} ramos · {stats.leaf} detalhes
+            {stats.total} conceitos · {stats.depth} níveis · {stats.branch} ramos · {stats.leaf}{" "}
+            detalhes
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -167,8 +169,8 @@ function MindMapCanvas({ data }: { data: MindMapData }) {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           fitView
-          fitViewOptions={{ padding: 0.18, maxZoom: 1.2 }}
-          minZoom={0.15}
+          fitViewOptions={{ padding: 0.12, maxZoom: 1.1 }}
+          minZoom={0.08}
           maxZoom={2}
           nodesConnectable={false}
           elementsSelectable

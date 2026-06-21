@@ -24,15 +24,40 @@ const fj = withFidelityJsonPreamble;
 
 export const TOOL_PROMPTS: Record<string, { system: string; json?: boolean }> = {
   "mind-map": {
-    system: fj(`Gere mapa mental acadêmico em JSON em ÁRVORE.
+    system: fj(`Gere MAPA MENTAL ACADÊMICO em JSON — ÁRVORE PROFUNDA (3 a 5 níveis). NÃO mapa raso.
+
 Formato: { "title", "nodes": [{ "id", "label", "type": "root"|"branch"|"leaf", "parent?" }] }
-REGRAS: 1 raiz; 12-35 nós; labels curtos; só material do aluno; sem ciclos.`),
+
+ESTRUTURA OBRIGATÓRIA:
+- Nível 0 (root, 1 nó): tema central
+- Nível 1 (branch, 4-8 nós): grandes eixos/categorias
+- Nível 2 (branch): autores, teorias ou subeixos — filhos de cada eixo
+- Nível 3+ (leaf): conceitos, termos, relações — 3-8 filhos POR autor/teoria quando o material permitir
+
+EXEMPLO DE PROFUNDIDADE (Teorias da Personalidade):
+root → Psicanalíticas → Freud → Id, Ego, Superego, Inconsciente, Mecanismos de Defesa...
+root → Behavioristas → Skinner → Reforço Positivo, Reforço Negativo, Modelagem...
+
+REGRAS CRÍTICAS:
+- 40-90 nós proporcional ao material (texto rico = mapa denso; NUNCA pare em 15-20 nós rasos)
+- PROIBIDO: só categorias + 1 nome por ramo (ex.: Psicanalíticas → Freud, Jung — SEM conceitos)
+- Cada autor/teoria citado no material deve ter filhos com seus conceitos principais
+- Labels curtos (2-45 chars); use "→" para relações (ex.: "Id → Prazer")
+- ids únicos; parent = id do pai; 1 raiz sem parent; sem ciclos
+- Só conteúdo do material do aluno — não invente autores ausentes`),
     json: true,
   },
   "pdf-quiz": {
-    system: fj(`Gere questões de estudo em JSON.
-Formato: { "title", "questions": [{ "type": "objective"|"discursive", "question", "options" (4 textos sem A/B), "answer" (0-based), "explanation", "rubric?", "modelAnswer?", "points" }] }
-REGRAS: fidelidade ao material; alternativas sem prefixo; gabarito obrigatório.`),
+    system: fj(`QUESTÕES DE ESTUDO em JSON — fieis ao material enviado.
+
+Formato: { "title", "questions": [{ "type": "objective"|"discursive", "question", "options" (4 textos SEM prefixo A/B/C/D), "answer" (índice 0-based: 0=A, 1=B, 2=C, 3=D), "explanation", "rubric?", "modelAnswer?", "points" }] }
+
+REGRAS OBRIGATÓRIAS:
+- Enunciados ESPECÍFICOS citando conceitos, termos, autores ou dados DO MATERIAL — PROIBIDO perguntas genéricas
+- 4 alternativas DISTINTAS, plausíveis e mutuamente exclusivas — PROIBIDO repetir texto ou usar "alternativa correta/incorreta"
+- "answer" = índice 0-based da alternativa correta — VARIE entre questões (não marque sempre 0 ou "A")
+- "explanation" obrigatória em objetivas, referenciando o conteúdo estudado
+- 8-15 questões proporcionais ao material; inclua 2-3 dissertativas`),
     json: true,
   },
   rewrite: {
@@ -61,14 +86,31 @@ REGRAS: só referências; proibido texto teórico; [COMPLETAR] se faltar dado.`)
     ),
   },
   "chat-pdf": {
-    system: chat(`CHAT_PDF_TOOL — JSON de resposta sobre documento.
-Formato: { "question", "answer", "excerpts": [{ "quote", "context" }], "references"?: [], "confidence": "high"|"medium"|"low", "followUp"?: [] }
-REGRAS: responda a pergunta com base no material; cite trechos; sem dissertação genérica.`),
+    system: chat(`CHAT_PDF_TOOL — Responda à PERGUNTA DO ALUNO com base no DOCUMENTO.
+
+Formato JSON: { "question", "answer", "excerpts": [{ "quote", "context" }], "references"?: [], "confidence": "high"|"medium"|"low", "followUp"?: [] }
+
+REGRAS CRÍTICAS:
+- Responda EXCLUSIVAMENTE à pergunta em "PERGUNTA DO ALUNO" — PROIBIDO inventar, substituir ou reformular a pergunta
+- Campo "question" no JSON = cópia EXATA da pergunta do aluno
+- Baseie a resposta SOMENTE no documento; cite trechos entre aspas em "excerpts"
+- Se a resposta não estiver no documento, diga claramente em "answer" e use confidence "low"
+- PROIBIDO redigir mini-artigo, resumo geral ou responder algo que o aluno não perguntou`),
     json: true,
   },
   "exam-sim": {
-    system: fj(`Gere simulado em JSON: { "exam": { "title", "duration", "totalPoints", "instructions", "questions": [...] } }
-Mesmo schema de questões do pdf-quiz. 15-20 questões proporcionais ao material.`),
+    system: fj(`SIMULADO DE PROVA em JSON — questões reais baseadas NO MATERIAL do aluno.
+
+Formato: { "exam": { "title", "duration", "totalPoints", "instructions", "questions": [{ "type", "question", "options" (4 textos sem A/B/C/D), "answer" (0-based), "explanation", "points", "rubric?", "modelAnswer?" }] } }
+
+REGRAS CRÍTICAS:
+- 15-20 questões cobrindo tópicos DIFERENTES do material — PROIBIDO repetir o mesmo conceito
+- Enunciados ESPECÍFICOS (cite termos, autores, datas, definições do texto) — PROIBIDO "qual alternativa melhor reflete..."
+- Alternativas: 4 opções DISTINTAS, plausíveis, baseadas no material — PROIBIDO alternativas vagas/genéricas
+- "answer": índice 0-based (0=A, 1=B, 2=C, 3=D) — OBRIGATÓRIO variar o gabarito entre questões
+- "explanation" obrigatória em cada objetiva
+- Inclua 3-5 dissertativas com rubrica
+- instructions: orientações de tempo e pontuação para o simulado`),
     json: true,
   },
   "exam-correction": {

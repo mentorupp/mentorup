@@ -3,7 +3,11 @@ import {
   getAreaMaxTokens,
   getToolInputLimit,
   getToolMaxTokens,
+  getToolModel,
+  getToolTemperature,
+  resolveAIOptions,
 } from "@/lib/ai-config";
+import { extractChatPdfQuestion } from "@/lib/chat-pdf";
 
 const openai = process.env.OPENAI_API_KEY?.trim()
   ? new OpenAI({
@@ -128,6 +132,7 @@ export type GenerateAIOptions = {
   inputLimit?: number;
   temperature?: number;
   model?: "gpt-4o-mini" | "gpt-4o";
+  json?: boolean;
 };
 
 export type VisionAIOptions = GenerateAIOptions;
@@ -140,9 +145,16 @@ async function callOpenAI(
 ): Promise<string> {
   if (!openai) throw new AIError("OpenAI não configurada.");
 
-  const inputLimit = options?.inputLimit ?? getToolInputLimit(options?.toolId);
-  const maxTokens =
-    options?.maxTokens ?? getToolMaxTokens(options?.toolId ?? "", json);
+  const toolId = options?.toolId ?? "";
+  const resolved = resolveAIOptions({
+    toolId,
+    json,
+    temperature: options?.temperature,
+    maxTokens: options?.maxTokens,
+    model: options?.model,
+  });
+  const inputLimit = options?.inputLimit ?? resolved.inputLimit;
+  const maxTokens = resolved.maxTokens;
 
   let lastError: unknown;
 
@@ -153,13 +165,14 @@ async function callOpenAI(
 
     try {
       const response = await openai.chat.completions.create({
-        model: options?.model ?? "gpt-4o-mini",
+        model: resolved.model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt.slice(0, inputLimit) },
         ],
-        temperature: options?.temperature ?? 0.6,
+        temperature: resolved.temperature,
         max_tokens: maxTokens,
+        top_p: 0.92,
         ...(json ? { response_format: { type: "json_object" } } : {}),
       });
 
@@ -234,8 +247,15 @@ async function callOpenAIVision(
 ): Promise<string> {
   if (!openai) throw new AIError("OpenAI não configurada.");
 
-  const maxTokens =
-    options?.maxTokens ?? getToolMaxTokens(options?.toolId ?? "exam-correction", json);
+  const toolId = options?.toolId ?? "exam-correction";
+  const resolved = resolveAIOptions({
+    toolId,
+    json,
+    temperature: options?.temperature ?? 0.2,
+    maxTokens: options?.maxTokens,
+    model: options?.model ?? "gpt-4o",
+  });
+  const maxTokens = resolved.maxTokens;
 
   const imageParts = images.map((img) => ({
     type: "image_url" as const,
@@ -254,7 +274,7 @@ async function callOpenAIVision(
 
     try {
       const response = await openai.chat.completions.create({
-        model: options?.model ?? "gpt-4o-mini",
+        model: resolved.model,
         messages: [
           { role: "system", content: systemPrompt },
           {
@@ -262,8 +282,9 @@ async function callOpenAIVision(
             content: [{ type: "text", text: userPrompt }, ...imageParts],
           },
         ],
-        temperature: options?.temperature ?? 0.3,
+        temperature: resolved.temperature,
         max_tokens: maxTokens,
+        top_p: 0.92,
         ...(json ? { response_format: { type: "json_object" } } : {}),
       });
 
@@ -347,20 +368,32 @@ function generateDemoResponse(
     userPrompt.slice(0, 200).replace(/\n/g, " ").trim() || "conteúdo acadêmico";
   const topicLines = extractTopicLines(userPrompt);
 
-  if (systemPrompt.includes("mapa mental") || systemPrompt.includes("mind map")) {
+  if (systemPrompt.includes("mapa mental") || systemPrompt.includes("mind map") || systemPrompt.includes("MAPA MENTAL")) {
     const data = {
-      title: "Mapa Mental — " + topic.slice(0, 40),
+      title: "Teorias da Personalidade",
       nodes: [
-        { id: "1", label: topic.slice(0, 50), type: "root" },
-        { id: "2", label: "Conceitos Fundamentais", type: "branch", parent: "1" },
-        { id: "3", label: "Definições e Terminologia", type: "leaf", parent: "2" },
-        { id: "4", label: "Princípios Teóricos", type: "leaf", parent: "2" },
-        { id: "5", label: "Aplicações Práticas", type: "branch", parent: "1" },
-        { id: "6", label: "Casos de Estudo", type: "leaf", parent: "5" },
-        { id: "7", label: "Metodologias", type: "leaf", parent: "5" },
-        { id: "8", label: "Relações e Conexões", type: "branch", parent: "1" },
-        { id: "9", label: "Interdisciplinaridade", type: "leaf", parent: "8" },
-        { id: "10", label: "Referências Cruzadas", type: "leaf", parent: "8" },
+        { id: "root", label: "Teorias da Personalidade", type: "root" },
+        { id: "psi", label: "Psicanalíticas", type: "branch", parent: "root" },
+        { id: "freud", label: "Sigmund Freud", type: "branch", parent: "psi" },
+        { id: "f1", label: "Id → Prazer", type: "leaf", parent: "freud" },
+        { id: "f2", label: "Ego → Realidade", type: "leaf", parent: "freud" },
+        { id: "f3", label: "Superego → Moral", type: "leaf", parent: "freud" },
+        { id: "f4", label: "Inconsciente", type: "leaf", parent: "freud" },
+        { id: "jung", label: "Carl Jung", type: "branch", parent: "psi" },
+        { id: "j1", label: "Inconsciente Coletivo", type: "leaf", parent: "jung" },
+        { id: "j2", label: "Arquétipos", type: "leaf", parent: "jung" },
+        { id: "beh", label: "Behavioristas", type: "branch", parent: "root" },
+        { id: "skinner", label: "B. F. Skinner", type: "branch", parent: "beh" },
+        { id: "s1", label: "Reforço Positivo", type: "leaf", parent: "skinner" },
+        { id: "s2", label: "Reforço Negativo", type: "leaf", parent: "skinner" },
+        { id: "s3", label: "Modelagem", type: "leaf", parent: "skinner" },
+        { id: "hum", label: "Humanistas", type: "branch", parent: "root" },
+        { id: "rogers", label: "Carl Rogers", type: "branch", parent: "hum" },
+        { id: "r1", label: "Self", type: "leaf", parent: "rogers" },
+        { id: "r2", label: "Autoconceito", type: "leaf", parent: "rogers" },
+        { id: "maslow", label: "Abraham Maslow", type: "branch", parent: "hum" },
+        { id: "m1", label: "Autorrealização", type: "leaf", parent: "maslow" },
+        { id: "m2", label: "Hierarquia de Necessidades", type: "leaf", parent: "maslow" },
       ],
     };
     return JSON.stringify(data);
@@ -393,46 +426,58 @@ function generateDemoResponse(
     });
   }
 
-  if (systemPrompt.includes("simulado de prova") || systemPrompt.includes("Gere simulado")) {
+  if (systemPrompt.includes("simulado de prova") || systemPrompt.includes("Gere simulado") || systemPrompt.includes("SIMULADO DE PROVA")) {
     const questionTopics =
       topicLines.length > 0
         ? topicLines
         : [
             topic.slice(0, 80),
-            "Fundamentação teórica",
-            "Metodologia e conceitos",
-            "Aplicações práticas",
-            "Análise crítica",
-            "Síntese e conclusões",
+            "Conceito principal do capítulo",
+            "Definição-chave do material",
+            "Relação entre conceitos",
+            "Aplicação prática",
+            "Autor ou teoria citada",
           ];
 
     const expandedTopics = [...questionTopics];
     while (expandedTopics.length < 12) {
-      expandedTopics.push(`Tópico complementar ${expandedTopics.length + 1} do material`);
+      expandedTopics.push(`Ponto ${expandedTopics.length + 1} do material enviado`);
     }
+
+    const answerRotation = [1, 2, 3, 0, 2, 1, 3, 0, 1, 2, 3, 0, 1, 2, 0];
 
     const questions = expandedTopics.slice(0, 15).map((label, index) => {
       if (index % 4 === 3) {
         return {
           type: "discursive",
-          question: `Discuta os aspectos centrais de "${label}" com base no material enviado.`,
+          question: `Explique "${label}" com base no material estudado, citando conceitos específicos.`,
           points: 2,
-          rubric: "Compreensão, argumentação, exemplos e clareza.",
+          rubric: "Compreensão do conceito, uso de termos do material, clareza e exemplos.",
+          modelAnswer: "Resposta esperada com os pontos centrais identificados no texto enviado.",
         };
+      }
+
+      const correctIdx = answerRotation[index % answerRotation.length];
+      const correctText = `Afirmação correta sobre "${label.slice(0, 50)}" conforme o material`;
+      const wrongOptions = [
+        `Interpretação parcial ou incompleta de "${label.slice(0, 40)}"`,
+        `Conceito de outro contexto não abordado no texto`,
+        `Definição invertida ou factualmente errada sobre o tema`,
+      ];
+      const options: string[] = ["", "", "", ""];
+      options[correctIdx] = correctText;
+      let w = 0;
+      for (let i = 0; i < 4; i++) {
+        if (i !== correctIdx) options[i] = wrongOptions[w++] ?? wrongOptions[0];
       }
 
       return {
         type: "objective",
-        question: `Sobre "${label}", qual alternativa melhor reflete o conteúdo estudado?`,
-        options: [
-          "Conceito alinhado ao material",
-          "Interpretação parcialmente correta",
-          "Afirmação incorreta",
-          "Informação não abordada no texto",
-        ],
-        answer: 0,
+        question: `De acordo com o material, qual afirmação sobre "${label.slice(0, 60)}" está correta?`,
+        options,
+        answer: correctIdx,
         points: 1,
-        explanation: "Baseado nos trechos identificados no material enviado.",
+        explanation: `A alternativa correta reflete o que o material afirma sobre "${label.slice(0, 40)}".`,
       };
     });
 
@@ -441,6 +486,8 @@ function generateDemoResponse(
         title: `Simulado — ${topicLines[0]?.slice(0, 60) ?? topic.slice(0, 50)}`,
         duration: "120 minutos",
         totalPoints: questions.reduce((s, q) => s + (q.points ?? 1), 0),
+        instructions:
+          "Leia cada questão com atenção. Questões objetivas valem 1 ponto; dissertativas valem 2 pontos. Tempo sugerido: 120 minutos.",
         questions,
       },
     };
@@ -624,15 +671,15 @@ function generateDemoResponse(
   }
 
   if (systemPrompt.includes("CHAT_PDF_TOOL") || systemPrompt.includes("CHAT COM DOCUMENTO")) {
-    const questionLine =
-      userPrompt.split("\n").find((l) => l.trim().endsWith("?"))?.trim() ||
-      "Qual é o ponto central do material?";
+    const userQuestion =
+      extractChatPdfQuestion(userPrompt) ||
+      "Qual é o tema principal deste documento?";
     return JSON.stringify({
-      question: questionLine,
+      question: userQuestion,
       answer:
-        "Com base no trecho enviado, o ponto central trata de " +
-        topic.slice(0, 120) +
-        ". (Prévia local — conecte a OpenAI para resposta completa com citações do documento.)",
+        "Com base no documento enviado: " +
+        topic.slice(0, 200) +
+        ". (Prévia local — conecte a OpenAI para resposta completa com citações do trecho.)",
       excerpts: topicLines.slice(0, 2).map((line) => ({
         quote: line.slice(0, 120),
         context: "Trecho identificado no material enviado",

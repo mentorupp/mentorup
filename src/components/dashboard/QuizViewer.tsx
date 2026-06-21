@@ -276,6 +276,8 @@ export default function QuizViewer({ data }: { data: QuizData }) {
           </p>
           <p className="text-xs text-zinc-500">
             {stats.total} questões · {stats.objective} objetivas
+            {data.duration && <> · {data.duration}</>}
+            {data.totalPoints != null && <> · {data.totalPoints} pts</>}
             {stats.answered > 0 && (
               <>
                 {" "}
@@ -283,6 +285,9 @@ export default function QuizViewer({ data }: { data: QuizData }) {
               </>
             )}
           </p>
+          {data.instructions && (
+            <p className="mt-1 text-xs text-zinc-400">{data.instructions}</p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <button

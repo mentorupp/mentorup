@@ -7,6 +7,7 @@ export type MindMapNodeData = {
   label: string;
   type: "root" | "branch" | "leaf";
   parent?: string;
+  order?: number;
 };
 
 export type MindMapData = {
@@ -25,16 +26,18 @@ export type RawMindMapData = {
 };
 
 export const NODE_DIMENSIONS = {
-  root: { width: 240, minHeight: 76 },
-  branch: { width: 210, minHeight: 58 },
-  leaf: { width: 190, minHeight: 50 },
+  root: { width: 260, minHeight: 72 },
+  branch: { width: 220, minHeight: 54 },
+  leaf: { width: 200, minHeight: 46 },
 } as const;
+
+const LABEL_MAX = 55;
 
 function measureNodeHeight(label: string, type: keyof typeof NODE_DIMENSIONS): number {
   const dim = NODE_DIMENSIONS[type];
-  const charsPerLine = type === "root" ? 30 : type === "branch" ? 26 : 24;
+  const charsPerLine = type === "root" ? 32 : type === "branch" ? 28 : 26;
   const lines = Math.max(1, Math.ceil(label.length / charsPerLine));
-  return Math.max(dim.minHeight, Math.min(lines * 22 + 20, 128));
+  return Math.max(dim.minHeight, Math.min(lines * 22 + 18, 120));
 }
 
 function findRootId(nodes: MindMapNodeData[]): string | null {
@@ -43,6 +46,31 @@ function findRootId(nodes: MindMapNodeData[]): string | null {
   const withoutParent = nodes.filter((n) => !n.parent);
   if (withoutParent.length === 1) return withoutParent[0].id;
   return withoutParent[0]?.id ?? nodes[0]?.id ?? null;
+}
+
+function assignTypesByDepth(
+  nodes: MindMapNodeData[],
+  rootId: string,
+  childrenMap: Map<string, MindMapNodeData[]>
+): MindMapNodeData[] {
+  const depths = new Map<string, number>();
+
+  function setDepth(id: string, depth: number) {
+    depths.set(id, depth);
+    for (const child of childrenMap.get(id) ?? []) {
+      setDepth(child.id, depth + 1);
+    }
+  }
+  setDepth(rootId, 0);
+
+  return nodes.map((n) => {
+    const depth = depths.get(n.id) ?? 0;
+    let type: MindMapNodeData["type"] = "leaf";
+    if (depth === 0) type = "root";
+    else if (depth <= 2) type = "branch";
+    else type = "leaf";
+    return { ...n, type };
+  });
 }
 
 export function normalizeMindMapData(raw: RawMindMapData): MindMapData {
@@ -63,16 +91,17 @@ export function normalizeMindMapData(raw: RawMindMapData): MindMapData {
 
       return {
         id,
-        label: n.label.trim().slice(0, 80),
+        label: n.label.trim().slice(0, LABEL_MAX),
         type,
         parent: n.parent ? String(n.parent).trim() : undefined,
+        order: index,
       };
     });
 
   if (nodes.length === 0) {
     return {
       title,
-      nodes: [{ id: "root", label: title.slice(0, 60), type: "root" }],
+      nodes: [{ id: "root", label: title.slice(0, 60), type: "root", order: 0 }],
     };
   }
 
@@ -81,7 +110,7 @@ export function normalizeMindMapData(raw: RawMindMapData): MindMapData {
 
   if (!rootId) {
     rootId = "root";
-    nodes.unshift({ id: rootId, label: title.slice(0, 60), type: "root" });
+    nodes.unshift({ id: rootId, label: title.slice(0, 60), type: "root", order: -1 });
     idSet.add(rootId);
   }
 
@@ -90,7 +119,7 @@ export function normalizeMindMapData(raw: RawMindMapData): MindMapData {
     const syntheticId = "root-center";
     const syntheticLabel = title.slice(0, 50) || "Tema central";
     nodes = [
-      { id: syntheticId, label: syntheticLabel, type: "root" },
+      { id: syntheticId, label: syntheticLabel, type: "root", order: -1 },
       ...nodes.map((n) => {
         if (roots.some((r) => r.id === n.id)) {
           return { ...n, type: "branch" as const, parent: syntheticId };
@@ -134,6 +163,9 @@ export function normalizeMindMapData(raw: RawMindMapData): MindMapData {
   }
   nodes.forEach((n) => breakCycle(n.id));
 
+  const childrenMap = buildChildrenMap(nodes);
+  nodes = assignTypesByDepth(nodes, rootId, childrenMap);
+
   return { title, nodes };
 }
 
@@ -146,64 +178,75 @@ export function buildChildrenMap(nodes: MindMapNodeData[]): Map<string, MindMapN
     map.set(node.parent, list);
   }
   for (const [, list] of map) {
-    list.sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
+    list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
   return map;
 }
 
-export function layoutRadialMindMap(
+/** Layout horizontal em árvore — ideal para mapas com 3-5 níveis de profundidade */
+export function layoutHorizontalTree(
   nodes: MindMapNodeData[],
   rootId: string,
-  centerX = 520,
-  centerY = 420
+  startX = 48,
+  startY = 40
 ): Map<string, { x: number; y: number; width: number; height: number }> {
   const childrenMap = buildChildrenMap(nodes);
   const nodeById = new Map(nodes.map((n) => [n.id, n]));
   const positions = new Map<string, { x: number; y: number; width: number; height: number }>();
 
-  function subtreeWeight(id: string): number {
-    const kids = childrenMap.get(id) ?? [];
-    if (kids.length === 0) return 1;
-    return kids.reduce((sum, child) => sum + subtreeWeight(child.id), 0);
-  }
+  const VERTICAL_GAP = 12;
+  const HORIZONTAL_GAP = 260;
 
-  function layoutNode(id: string, angleStart: number, angleSpan: number, depth: number) {
-    const node = nodeById.get(id);
-    if (!node) return;
-
+  function getNodeSize(id: string) {
+    const node = nodeById.get(id)!;
     const nodeType =
       node.type === "root" ? "root" : node.type === "branch" ? "branch" : "leaf";
     const width = NODE_DIMENSIONS[nodeType].width;
     const height = measureNodeHeight(node.label, nodeType);
+    return { width, height, nodeType };
+  }
 
-    const angle = angleStart + angleSpan / 2;
-    const radius = depth === 0 ? 0 : 155 + (depth - 1) * 145;
-    const x = centerX + radius * Math.cos(angle - Math.PI / 2);
-    const y = centerY + radius * Math.sin(angle - Math.PI / 2);
-
-    positions.set(id, {
-      x: x - width / 2,
-      y: y - height / 2,
-      width,
-      height,
-    });
-
+  function subtreeHeight(id: string): number {
     const kids = childrenMap.get(id) ?? [];
+    const { height } = getNodeSize(id);
+    if (kids.length === 0) return height;
+    const kidsHeight = kids.reduce(
+      (sum, child, i) => sum + subtreeHeight(child.id) + (i > 0 ? VERTICAL_GAP : 0),
+      0
+    );
+    return Math.max(height, kidsHeight);
+  }
+
+  function layoutSubtree(id: string, depth: number, topY: number): void {
+    const { width, height } = getNodeSize(id);
+    const kids = childrenMap.get(id) ?? [];
+    const subtreeH = subtreeHeight(id);
+    const x = startX + depth * HORIZONTAL_GAP;
+    const y = topY + subtreeH / 2 - height / 2;
+
+    positions.set(id, { x, y, width, height });
+
     if (kids.length === 0) return;
 
-    let cursor = angleStart;
-    const total = kids.reduce((sum, child) => sum + subtreeWeight(child.id), 0);
-
+    let childTop = topY;
     for (const child of kids) {
-      const weight = subtreeWeight(child.id) / total;
-      const span = angleSpan * weight;
-      layoutNode(child.id, cursor, span, depth + 1);
-      cursor += span;
+      layoutSubtree(child.id, depth + 1, childTop);
+      childTop += subtreeHeight(child.id) + VERTICAL_GAP;
     }
   }
 
-  layoutNode(rootId, 0, Math.PI * 2, 0);
+  layoutSubtree(rootId, 0, startY);
   return positions;
+}
+
+export function getTreeDepth(nodes: MindMapNodeData[], rootId: string): number {
+  const childrenMap = buildChildrenMap(nodes);
+  function depth(id: string): number {
+    const kids = childrenMap.get(id) ?? [];
+    if (kids.length === 0) return 1;
+    return 1 + Math.max(...kids.map((c) => depth(c.id)));
+  }
+  return depth(rootId);
 }
 
 export function toFlowElements(data: MindMapData): {
@@ -217,7 +260,7 @@ export function toFlowElements(data: MindMapData): {
     return { normalized, nodes: [], edges: [] };
   }
 
-  const positions = layoutRadialMindMap(normalized.nodes, rootId);
+  const positions = layoutHorizontalTree(normalized.nodes, rootId);
 
   const nodes: Node[] = normalized.nodes.map((node) => {
     const pos = positions.get(node.id)!;
@@ -244,7 +287,7 @@ export function toFlowElements(data: MindMapData): {
       target: node.id,
       type: "smoothstep",
       animated: false,
-      style: { stroke: "#94a3b8", strokeWidth: 2.5 },
+      style: { stroke: "#94a3b8", strokeWidth: 2 },
     }));
 
   return { normalized, nodes, edges };
@@ -254,7 +297,17 @@ export function getMindMapAIOptions(input: string) {
   const words = input.trim().split(/\s+/).filter(Boolean).length;
   return {
     toolId: MIND_MAP_TOOL_ID,
-    temperature: 0.25,
-    maxTokens: words <= 150 ? 3_000 : undefined,
+    temperature: 0.2,
+    maxTokens: words <= 150 ? 7_000 : words <= 500 ? 10_000 : 12_000,
   };
+}
+
+/** @deprecated Use layoutHorizontalTree — mantido para compatibilidade */
+export function layoutRadialMindMap(
+  nodes: MindMapNodeData[],
+  rootId: string,
+  centerX = 520,
+  centerY = 420
+) {
+  return layoutHorizontalTree(nodes, rootId, centerX, centerY);
 }
