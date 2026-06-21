@@ -1,10 +1,6 @@
 import OpenAI, { APIError } from "openai";
 import {
   getAreaMaxTokens,
-  getToolInputLimit,
-  getToolMaxTokens,
-  getToolModel,
-  getToolTemperature,
   resolveAIOptions,
 } from "@/lib/ai-config";
 import { extractChatPdfQuestion } from "@/lib/chat-pdf";
@@ -211,7 +207,7 @@ export async function generateAI(
     return {
       text: generateDemoResponse(systemPrompt, userPrompt, json),
       demo: true,
-      demoReason: "OpenAI não configurada no servidor — prévia local ativa.",
+      demoReason: "OpenAI não configurada — você está vendo uma PRÉVIA LOCAL, não a IA real. Configure OPENAI_API_KEY na Vercel para qualidade ChatGPT.",
     };
   }
 

@@ -1,6 +1,6 @@
 import {
   getToolMaxTokens,
-  USER_MATERIAL_SUFFIX,
+  getUserPromptSuffix,
 } from "@/lib/ai-config";
 import type { GenerateAIOptions } from "@/lib/ai";
 
@@ -22,7 +22,7 @@ export function buildSummarizeUserPrompt(input: string): string {
     scaleHint = `\n\n[Material extenso: ~${words} palavras. Resumo acadêmico estruturado cobrindo todos os temas do original, sem inventar conteúdo externo.]`;
   }
 
-  return `${input}${scaleHint}${USER_MATERIAL_SUFFIX}`;
+  return `${input}${scaleHint}${getUserPromptSuffix(SUMMARIZE_TOOL_ID, { json: false })}`;
 }
 
 export function getSummarizeMaxTokens(wordCount: number): number {

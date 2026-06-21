@@ -121,11 +121,11 @@ export function prepareToolRequest(
     }
   } else if (toolId === PDF_QUIZ_TOOL_ID || toolId === "exam-sim") {
     userPrompt = buildQuizUserPrompt(userPrompt, toolId);
-  } else if (!isJson && !TEXT_TRANSFORM_TOOLS.has(toolId)) {
-    userPrompt += USER_MATERIAL_SUFFIX;
-  } else if (TEXT_TRANSFORM_TOOLS.has(toolId)) {
-    userPrompt +=
-      "\n\n[Entregue SOMENTE o texto final transformado, sem comentários, sem seções novas e sem meta-explicações.]";
+  } else {
+    userPrompt += getUserPromptSuffix(toolId, {
+      json: isJson,
+      textTransform: TEXT_TRANSFORM_TOOLS.has(toolId),
+    });
   }
 
   const scheduleWeeksMatch = input.match(/Semanas de planejamento:\s*(\d+)/i);
@@ -178,9 +178,17 @@ export function prepareToolRequest(
                                       temperature: 0.2,
                                       maxTokens: Math.min(10_000, words * 12 + 2000),
                                     }
-                                  : { toolId, temperature: 0.35 };
+                                  : { toolId, temperature: 0.28 };
 
-  return { userPrompt, aiOptions };
+  return {
+    userPrompt,
+    aiOptions: resolveAIOptions({
+      toolId,
+      json: isJson,
+      temperature: aiOptions.temperature,
+      maxTokens: aiOptions.maxTokens,
+    }),
+  };
 }
 
 export function postProcessToolResult(

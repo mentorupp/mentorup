@@ -34,7 +34,7 @@ export function extractChatPdfQuestion(input: string): string | null {
 export function getChatPdfAIOptions() {
   return {
     toolId: CHAT_PDF_TOOL_ID,
-    temperature: 0.2,
-    maxTokens: 4_500,
+    temperature: 0.15,
+    maxTokens: 6_000,
   };
 }

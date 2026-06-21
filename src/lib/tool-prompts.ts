@@ -66,12 +66,27 @@ REGRAS OBRIGATÓRIAS:
     ),
   },
   summarize: {
-    system: s(`Elabore RESUMO ACADÊMICO fiel ao material.
-REGRAS: só ideias presentes; proporcional ao tamanho; texto curto → resumo curto; proibido inventar teoria/história.`),
+    system: s(`Elabore RESUMO ACADÊMICO EXCEPCIONAL — denso, estruturado e 100% fiel ao material.
+
+ESTRUTURA (adaptar ao tamanho do material):
+- Título/tema identificado
+- Ideias centrais em parágrafos ou tópicos numerados
+- Conceitos-chave, definições e relações presentes no texto
+- Conclusão sintética (se o material permitir)
+
+REGRAS:
+- Só ideias PRESENTES no material — zero invenção de teoria, autor ou capítulo
+- Texto curto → resumo curto; texto longo → resumo estruturado e completo
+- Linguagem acadêmica clara; profundidade de professor experiente`),
   },
   flashcards: {
-    system: fj(`Gere flashcards em JSON: { "title", "cards": [{ "front", "back" }] }
-REGRAS: 12-30 cartões; verso 2-4 frases; só conteúdo do material; frente = pergunta/conceito específico.`),
+    system: fj(`Flashcards de estudo PROFISSIONAIS em JSON: { "title", "cards": [{ "front", "back" }] }
+
+REGRAS:
+- 15-35 cartões proporcionais ao material
+- Frente: pergunta/conceito ESPECÍFICO (nunca "Conceito 1")
+- Verso: 2-5 frases densas com definição, contexto e aplicação DO MATERIAL
+- Cobrir todos os tópicos importantes; sem repetição`),
     json: true,
   },
   references: {
@@ -133,9 +148,15 @@ REGRAS CRÍTICAS:
     ),
   },
   "explain-content": {
-    system: exp(`EXPLAIN_CONTENT_TOOL — JSON didático.
-Formato: { "title", "summary", "sections": [{ "heading", "content", "example?" }], "glossary": [{ "term", "definition" }], "commonMistakes": [], "reviewQuestions": [] }
-REGRAS: fiel ao material; seções proporcionais; glossário só termos do trecho.`),
+    system: exp(`EXPLAIN_CONTENT_TOOL — explicação didática de nível professor particular.
+
+Formato JSON: { "title", "summary", "sections": [{ "heading", "content", "example?" }], "glossary": [{ "term", "definition" }], "commonMistakes": [], "reviewQuestions": [] }
+
+REGRAS:
+- Explique como um tutor excelente: claro, profundo, com exemplos do trecho
+- Seções densas (4+ frases cada); glossário com termos do material
+- 3-5 erros comuns + 3-5 perguntas de fixação
+- PROIBIDO dissertação genérica ou conteúdo ausente no material`),
     json: true,
   },
   citations: {

@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AIError, generateAI } from "@/lib/ai";
-import { getAreaMaxTokens, USER_MATERIAL_SUFFIX, withAreaToolPreamble } from "@/lib/ai-config";
+import {
+  buildAreaUserPrompt,
+  getAreaMaxTokens,
+  resolveAIOptions,
+  withAreaToolPreamble,
+} from "@/lib/ai-config";
 import { auth } from "@/lib/auth";
 import { checkAndDeductCredits } from "@/lib/credits";
 import { prisma } from "@/lib/prisma";
@@ -9,7 +14,7 @@ import { getAreaBySlug } from "@/lib/tools-config";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 90;
 
 const schema = z.object({
   areaSlug: z.string(),
@@ -44,12 +49,18 @@ export async function POST(req: Request) {
 
     const system = withAreaToolPreamble(
       areaTool.systemPrompt ??
-        `Você é especialista em ${area.name}. Ferramenta: ${areaTool.name}. Contexto: ${areaTool.promptHint}. ${areaTool.description}. Entregue EXATAMENTE o tipo de documento descrito — conteúdo específico, profissional e pronto para uso real.`
+        `Você é especialista sênior em ${area.name}. Ferramenta: ${areaTool.name}. Contexto: ${areaTool.promptHint}. ${areaTool.description}. Entregue documento profissional, denso e específico ao material — padrão de excelência clínica/acadêmica.`
     );
 
-    const aiResult = await generateAI(system, input + USER_MATERIAL_SUFFIX, false, {
+    const userPrompt = buildAreaUserPrompt(input, areaTool.name, area.name);
+    const aiOptions = resolveAIOptions({
+      toolId: "area-tool",
+      json: false,
       maxTokens: getAreaMaxTokens(),
+      temperature: 0.28,
     });
+
+    const aiResult = await generateAI(system, userPrompt, false, aiOptions);
 
     const creditCost = aiResult.demo ? 0 : areaTool.credits;
 
