@@ -1,5 +1,8 @@
 import ToolRunner from "@/components/dashboard/ToolRunner";
 import ExamCorrectionRunner from "@/components/dashboard/ExamCorrectionRunner";
+import StudyScheduleRunner from "@/components/dashboard/StudyScheduleRunner";
+import ReferencesRunner from "@/components/dashboard/ReferencesRunner";
+import SlidesRunner from "@/components/dashboard/SlidesRunner";
 import { getToolById } from "@/lib/tools-config";
 import { notFound } from "next/navigation";
 
@@ -14,9 +17,9 @@ const placeholders: Record<string, string> = {
   "exam-sim": "Envie PDF/Word ou cole o material da disciplina para o simulado...",
   "exam-correction": "Opcional: informe a matéria ou número das questões...",
   "exercise-solution": "Cole a lista de exercícios ou questões para resolução comentada...",
-  "study-schedule": "Informe suas disciplinas, datas de provas e prazo do semestre...",
+  "study-schedule": "Ex.: Psicologia — Ansiedade e estresse (caps. 3-5). Prova dia 15/08. Inclua revisão e simulado...",
   "chat-pdf": "Envie PDF/Word ou cole o documento — inclua sua pergunta no início...",
-  references: "Informe: autor, título, ano, editora, URL ou DOI...",
+  references: "Cole DOI, URL, bibliografia ou capa do trabalho (autor, título, ano, cidade)...",
   citations: "Cole o trecho a citar e os dados da fonte (autor, ano, página)...",
   "abnt-format": "Cole trechos do trabalho ou descreva o que precisa formatar (capa, citações, referências)...",
   rewrite: "Envie PDF/Word ou cole o texto que deseja reescrever...",
@@ -33,7 +36,7 @@ const placeholders: Record<string, string> = {
   "methodology-builder": "Descreva tema, tipo de pesquisa pretendida e contexto (curso, prazo)...",
   "tcc-structure": "Descreva tema, curso, tipo de pesquisa e orientações da instituição...",
   "case-study": "Envie PDF/Word, cole o material ou descreva o caso...",
-  "slides-builder": "Cole o conteúdo do trabalho ou descreva o tema da apresentação...",
+  "slides-builder": "Cole resumo do TCC, capítulos ou tema — geramos slides + roteiro de fala com tempo...",
   "defense-sim": "Cole resumo do TCC (introdução, metodologia, resultados) para simular a banca...",
 };
 
@@ -64,6 +67,12 @@ export default async function ToolPage({
       </div>
       {toolId === "exam-correction" ? (
         <ExamCorrectionRunner toolId={toolId} />
+      ) : toolId === "study-schedule" ? (
+        <StudyScheduleRunner toolId={toolId} placeholder={placeholder} />
+      ) : toolId === "references" ? (
+        <ReferencesRunner toolId={toolId} placeholder={placeholder} />
+      ) : toolId === "slides-builder" ? (
+        <SlidesRunner toolId={toolId} placeholder={placeholder} />
       ) : (
         <ToolRunner toolId={toolId} placeholder={placeholder} />
       )}

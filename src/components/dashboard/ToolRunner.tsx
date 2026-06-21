@@ -7,15 +7,86 @@ import { Loader2, Sparkles, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { getToolById } from "@/lib/tools-config";
 import { UPLOAD_FORMAT_HINT } from "@/lib/upload-formats";
+import { getResultCopyLabel, isInteractiveTool } from "@/lib/tool-engine";
 import DocumentUploadZone from "./DocumentUploadZone";
 import MindMapViewer from "./MindMapViewer";
+import { normalizeMindMapData, type RawMindMapData } from "@/lib/mind-map";
 import QuizViewer from "./QuizViewer";
+import { normalizeQuizData, type RawQuizData } from "@/lib/quiz-normalize";
 import FlashcardViewer from "./FlashcardViewer";
+import CitationsViewer from "./CitationsViewer";
+import ChatPdfViewer from "./ChatPdfViewer";
+import ExplainViewer from "./ExplainViewer";
+import ExerciseViewer from "./ExerciseViewer";
+import DefenseViewer from "./DefenseViewer";
+import ArticleSearchViewer from "./ArticleSearchViewer";
+import ResearchThemeViewer from "./ResearchThemeViewer";
+import {
+  normalizeArticleSearch,
+  normalizeChatPdf,
+  normalizeCitations,
+  normalizeDefenseSim,
+  normalizeExerciseSolution,
+  normalizeExplainContent,
+  normalizeFlashcards,
+  normalizeResearchTheme,
+  type RawArticleSearch,
+  type RawChatPdf,
+  type RawCitations,
+  type RawDefenseSim,
+  type RawExerciseSolution,
+  type RawExplainContent,
+  type RawFlashcards,
+  type RawResearchTheme,
+} from "@/lib/tool-formats";
 
 interface ToolRunnerProps {
   toolId: string;
   placeholder?: string;
   extraFields?: React.ReactNode;
+}
+
+function ToolResult({
+  toolId,
+  result,
+}: {
+  toolId: string;
+  result: string | Record<string, unknown>;
+}) {
+  if (typeof result !== "object" || result === null) return null;
+
+  switch (toolId) {
+    case "mind-map":
+      return <MindMapViewer data={normalizeMindMapData(result as RawMindMapData)} />;
+    case "pdf-quiz":
+      return <QuizViewer data={normalizeQuizData(result as RawQuizData)} />;
+    case "exam-sim":
+      return (
+        <QuizViewer
+          data={normalizeQuizData(
+            ((result as { exam?: RawQuizData }).exam ?? result) as RawQuizData
+          )}
+        />
+      );
+    case "flashcards":
+      return <FlashcardViewer data={normalizeFlashcards(result as RawFlashcards)} />;
+    case "citations":
+      return <CitationsViewer data={normalizeCitations(result as RawCitations)} />;
+    case "chat-pdf":
+      return <ChatPdfViewer data={normalizeChatPdf(result as RawChatPdf)} />;
+    case "explain-content":
+      return <ExplainViewer data={normalizeExplainContent(result as RawExplainContent)} />;
+    case "exercise-solution":
+      return <ExerciseViewer data={normalizeExerciseSolution(result as RawExerciseSolution)} />;
+    case "defense-sim":
+      return <DefenseViewer data={normalizeDefenseSim(result as RawDefenseSim)} />;
+    case "article-search":
+      return <ArticleSearchViewer data={normalizeArticleSearch(result as RawArticleSearch)} />;
+    case "research-theme":
+      return <ResearchThemeViewer data={normalizeResearchTheme(result as RawResearchTheme)} />;
+    default:
+      return null;
+  }
 }
 
 export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRunnerProps) {
@@ -32,9 +103,7 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
   const { data: session, update } = useSession();
   const router = useRouter();
 
-  const isInteractiveResult = ["mind-map", "pdf-quiz", "flashcards", "exam-sim", "defense-sim"].includes(
-    tool.id
-  );
+  const interactive = isInteractiveTool(tool.id);
 
   const resultText =
     typeof result === "string" ? result : result ? JSON.stringify(result, null, 2) : "";
@@ -167,28 +236,14 @@ export default function ToolRunner({ toolId, placeholder, extraFields }: ToolRun
           </div>
         )}
 
-        {result && tool.id === "mind-map" && typeof result === "object" ? (
-          <MindMapViewer data={result as { title: string; nodes: { id: string; label: string; type: string; parent?: string }[] }} />
+        {result && interactive && typeof result === "object" ? (
+          <ToolResult toolId={tool.id} result={result} />
         ) : null}
 
-        {result && (tool.id === "pdf-quiz" || tool.id === "defense-sim") && typeof result === "object" ? (
-          <QuizViewer data={result as { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string; rubric?: string; points?: number; category?: string; suggestedAnswer?: string; tips?: string }>> }} />
-        ) : null}
-
-        {result && tool.id === "flashcards" && typeof result === "object" ? (
-          <FlashcardViewer data={result as { cards: { front: string; back: string }[] }} />
-        ) : null}
-
-        {result && tool.id === "exam-sim" && typeof result === "object" ? (
-          <QuizViewer data={(result as { exam?: { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string }>> } }).exam ?? (result as { questions?: Array<Partial<{ type: string; question: string; options?: string[]; answer?: number; explanation?: string }>> })} />
-        ) : null}
-
-        {result && !isInteractiveResult && (
+        {result && !interactive && (
           <>
             <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="text-xs font-medium text-accent-800">
-                Pronto para copiar e colar no Word (ABNT)
-              </p>
+              <p className="text-xs font-medium text-accent-800">{getResultCopyLabel(tool.id)}</p>
               <button
                 type="button"
                 onClick={() => void handleCopy()}

@@ -126,7 +126,11 @@ export type GenerateAIOptions = {
   toolId?: string;
   maxTokens?: number;
   inputLimit?: number;
+  temperature?: number;
+  model?: "gpt-4o-mini" | "gpt-4o";
 };
+
+export type VisionAIOptions = GenerateAIOptions;
 
 async function callOpenAI(
   systemPrompt: string,
@@ -149,12 +153,12 @@ async function callOpenAI(
 
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: options?.model ?? "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt.slice(0, inputLimit) },
         ],
-        temperature: 0.6,
+        temperature: options?.temperature ?? 0.6,
         max_tokens: maxTokens,
         ...(json ? { response_format: { type: "json_object" } } : {}),
       });
@@ -226,9 +230,12 @@ async function callOpenAIVision(
   userPrompt: string,
   images: VisionImage[],
   json: boolean,
-  maxTokens?: number
+  options?: VisionAIOptions
 ): Promise<string> {
   if (!openai) throw new AIError("OpenAI não configurada.");
+
+  const maxTokens =
+    options?.maxTokens ?? getToolMaxTokens(options?.toolId ?? "exam-correction", json);
 
   const imageParts = images.map((img) => ({
     type: "image_url" as const,
@@ -247,7 +254,7 @@ async function callOpenAIVision(
 
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: options?.model ?? "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           {
@@ -255,8 +262,8 @@ async function callOpenAIVision(
             content: [{ type: "text", text: userPrompt }, ...imageParts],
           },
         ],
-        temperature: 0.3,
-        max_tokens: maxTokens ?? getToolMaxTokens("exam-correction", json),
+        temperature: options?.temperature ?? 0.3,
+        max_tokens: maxTokens,
         ...(json ? { response_format: { type: "json_object" } } : {}),
       });
 
@@ -289,7 +296,8 @@ export async function generateAIVision(
   systemPrompt: string,
   userPrompt: string,
   images: VisionImage[],
-  json = false
+  json = false,
+  options?: VisionAIOptions
 ): Promise<AIResult> {
   if (!openai) {
     return {
@@ -300,7 +308,7 @@ export async function generateAIVision(
   }
 
   try {
-    const text = await callOpenAIVision(systemPrompt, userPrompt, images, json);
+    const text = await callOpenAIVision(systemPrompt, userPrompt, images, json, options);
     return { text, demo: false };
   } catch (error) {
     if (shouldFallbackToDemo(error)) {
@@ -358,7 +366,7 @@ function generateDemoResponse(
     return JSON.stringify(data);
   }
 
-  if (systemPrompt.includes("corrigindo provas")) {
+  if (systemPrompt.includes("EXAM_VISION_TRANSCRIBE") || systemPrompt.includes("EXAM_VISION_CORRECT")) {
     const items = [1, 2, 3].map((n) => ({
       number: String(n),
       type: n === 3 ? "discursive" : "objective",
@@ -385,7 +393,7 @@ function generateDemoResponse(
     });
   }
 
-  if (systemPrompt.includes("simulado de prova")) {
+  if (systemPrompt.includes("simulado de prova") || systemPrompt.includes("Gere simulado")) {
     const questionTopics =
       topicLines.length > 0
         ? topicLines
@@ -437,6 +445,67 @@ function generateDemoResponse(
       },
     };
     return JSON.stringify(data);
+  }
+
+  if (systemPrompt.includes("CRONOGRAMA DE ESTUDOS")) {
+    const subject = topic.slice(0, 50) || "Conteúdo acadêmico";
+    return JSON.stringify({
+      title: `Cronograma — ${subject}`,
+      summary:
+        "Cronograma demonstrativo. Configure a OpenAI para planejamento completo com base no seu material.",
+      period: { totalWeeks: 4, hoursPerDay: 2, hoursPerWeek: 10, examDate: null },
+      milestones: [
+        { week: 2, label: "Revisão intermediária", type: "review" },
+        { week: 4, label: "Simulado final", type: "exam" },
+      ],
+      weeks: [1, 2, 3, 4].map((weekNumber) => ({
+        weekNumber,
+        theme: weekNumber === 4 ? "Revisão e simulado" : `Módulo ${weekNumber}`,
+        totalHours: 10,
+        days: [
+          {
+            day: "Segunda",
+            tasks: [
+              {
+                time: "1h30",
+                activity: `Leitura e anotações — ${subject}`,
+                subject: "Disciplina",
+                type: "reading",
+              },
+            ],
+          },
+          {
+            day: "Quarta",
+            tasks: [
+              {
+                time: "1h",
+                activity: "Resolver 10 questões do material",
+                type: "practice",
+              },
+            ],
+          },
+          {
+            day: "Sexta",
+            tasks: [
+              {
+                time: "1h",
+                activity: "Revisão espaçada dos pontos-chave",
+                type: "review",
+              },
+            ],
+          },
+          {
+            day: "Domingo",
+            tasks: [{ time: "—", activity: "Descanso ativo", type: "rest" }],
+          },
+        ],
+      })),
+      tips: [
+        "Revise em intervalos de 24h, 72h e 7 dias.",
+        "Alterne leitura, exercícios e revisão.",
+        "Durma bem na véspera da prova.",
+      ],
+    });
   }
 
   if (systemPrompt.includes("questões") || systemPrompt.includes("quiz")) {
@@ -493,8 +562,227 @@ function generateDemoResponse(
     return JSON.stringify({ cards });
   }
 
+  if (systemPrompt.includes("SLIDES_BUILDER_TOOL")) {
+    const subject = topic.slice(0, 60) || "Apresentação acadêmica";
+    return JSON.stringify({
+      title: subject,
+      durationMinutes: 5,
+      summary: "Prévia local — conecte a OpenAI para slides completos com base no seu material.",
+      slides: [
+        {
+          number: 1,
+          title: subject,
+          layout: "title",
+          bullets: ["Seu nome", "Disciplina / Banca"],
+          speakerNotes:
+            "Bom dia. Meu nome é [nome] e hoje apresento os principais pontos sobre " +
+            subject +
+            ".",
+          durationSeconds: 45,
+          visualHint: "Fundo limpo com título centralizado",
+        },
+        {
+          number: 2,
+          title: "Objetivo da apresentação",
+          layout: "content",
+          bullets: [
+            "Contextualizar o tema",
+            "Apresentar conceitos-chave do material",
+            "Relacionar com a prática",
+          ],
+          speakerNotes:
+            "Neste slide, explico o objetivo geral e o que o ouvinte deve reter até o final.",
+          durationSeconds: 60,
+        },
+        {
+          number: 3,
+          title: "Obrigado!",
+          layout: "thankyou",
+          bullets: ["Perguntas?"],
+          speakerNotes: "Agradeço a atenção e fico à disposição para perguntas.",
+          durationSeconds: 30,
+        },
+      ],
+      tips: ["Ensaie com o cronômetro", "Mantenha contato visual", "Use os bullets como guia, não leia"],
+    });
+  }
+
+  if (systemPrompt.includes("REFERENCES_BIBLIOGRAPHY_TOOL")) {
+    const year = new Date().getFullYear();
+    return JSON.stringify({
+      summary: "Prévia local — 1 referência demonstrativa. Conecte a OpenAI para formatação real.",
+      abnt: [
+        {
+          formatted: `SOBRENOME, Nome. ${topic.slice(0, 80)}. Imperatriz: [COMPLETAR: instituição], ${year}.`,
+          sourceLabel: "Fonte informada",
+          type: "thesis",
+          missingFields: ["instituição"],
+        },
+      ],
+      warnings: ["Modo demonstração — configure OPENAI_API_KEY para referências precisas."],
+    });
+  }
+
+  if (systemPrompt.includes("CHAT_PDF_TOOL") || systemPrompt.includes("CHAT COM DOCUMENTO")) {
+    const questionLine =
+      userPrompt.split("\n").find((l) => l.trim().endsWith("?"))?.trim() ||
+      "Qual é o ponto central do material?";
+    return JSON.stringify({
+      question: questionLine,
+      answer:
+        "Com base no trecho enviado, o ponto central trata de " +
+        topic.slice(0, 120) +
+        ". (Prévia local — conecte a OpenAI para resposta completa com citações do documento.)",
+      excerpts: topicLines.slice(0, 2).map((line) => ({
+        quote: line.slice(0, 120),
+        context: "Trecho identificado no material enviado",
+      })),
+      confidence: "medium",
+      followUp: ["Quais são os conceitos-chave?", "Como isso se aplica na prática?"],
+    });
+  }
+
+  if (systemPrompt.includes("CITATIONS_TOOL") || systemPrompt.includes("CITAÇÕES ABNT")) {
+    return JSON.stringify({
+      summary: "Prévia local — citações demonstrativas.",
+      citations: [
+        {
+          type: "indirect",
+          formatted: `Conforme aponta Autor (${new Date().getFullYear()}), ${topic.slice(0, 80)}.`,
+          reference: `AUTOR, Nome. ${topic.slice(0, 60)}. Ano.`,
+          sourceLabel: "Fonte informada",
+        },
+      ],
+      warnings: ["Configure OPENAI_API_KEY para citações precisas com dados reais."],
+    });
+  }
+
+  if (systemPrompt.includes("EXPLAIN_CONTENT_TOOL") || systemPrompt.includes("EXPLICAR CONTEÚDO")) {
+    const heading = topicLines[0]?.slice(0, 60) || topic.slice(0, 50);
+    return JSON.stringify({
+      title: `Explicação — ${heading}`,
+      summary: "Prévia didática baseada no trecho enviado.",
+      sections: [
+        {
+          heading: "O que é",
+          content: topic.slice(0, 200) || "Conceito extraído do material enviado.",
+          example: "Exemplo relacionado ao contexto informado pelo aluno.",
+        },
+        {
+          heading: "Por que importa",
+          content: "Este conceito aparece no material porque organiza a compreensão dos demais tópicos.",
+        },
+      ],
+      glossary: [{ term: heading.slice(0, 40), definition: "Termo-chave do trecho analisado." }],
+      commonMistakes: ["Confundir conceitos próximos sem reler a definição original."],
+      reviewQuestions: ["Explique com suas palavras o conceito principal.", "Dê um exemplo do contexto estudado."],
+    });
+  }
+
+  if (systemPrompt.includes("EXERCISE_SOLUTION_TOOL")) {
+    return JSON.stringify({
+      title: "Exercícios resolvidos — prévia",
+      exercises: [
+        {
+          number: 1,
+          statement: topic.slice(0, 120) || "Exercício identificado no material enviado.",
+          steps: [
+            "Identificar os dados fornecidos no enunciado.",
+            "Aplicar o procedimento indicado no material.",
+            "Verificar a resposta final.",
+          ],
+          answer: "Resposta conforme método do material (prévia local).",
+          verification: "Substituir na expressão original para confirmar.",
+        },
+      ],
+    });
+  }
+
+  if (systemPrompt.includes("DEFENSE_SIM_TOOL")) {
+    const categories = ["Metodologia", "Resultados", "Teoria", "Limitações", "Contribuição"];
+    const questions = categories.map((category, i) => ({
+      question: `Como você justifica ${category.toLowerCase()} do seu trabalho sobre ${topic.slice(0, 40)}?`,
+      category,
+      suggestedAnswer:
+        "Resposta sugerida baseada no resumo enviado: apresente objetivo, método e principais achados com clareza e exemplos do seu estudo.",
+      tips: "Seja objetivo, cite dados do seu trabalho e reconheça limitações com honestidade.",
+    }));
+    return JSON.stringify({
+      title: "Simulação de banca — prévia",
+      questions: questions.slice(0, 6),
+    });
+  }
+
+  if (systemPrompt.includes("ARTICLE_SEARCH_TOOL")) {
+    const kw = topic.slice(0, 40).replace(/\s+/g, " ").trim() || "tema";
+    return JSON.stringify({
+      title: `Estratégia de busca — ${kw}`,
+      databases: ["SciELO", "Google Scholar", "CAPES Periódicos", "PubMed"],
+      booleanQueries: [
+        { label: "Ampla", query: `("${kw}" OR "${kw.split(" ")[0]}") AND (estudo OR pesquisa)` },
+        { label: "Restrita", query: `"${kw}" AND ("Brasil" OR "brasileiro")` },
+      ],
+      descriptors: { mesh: [kw], decs: [kw] },
+      inclusionCriteria: ["Artigos em português ou inglês", "Publicados nos últimos 10 anos"],
+      exclusionCriteria: ["Editoriais sem revisão por pares", "Resumos de evento sem texto completo"],
+      selectionFlow: ["Busca", "Triagem por título/resumo", "Leitura integral", "Extração de dados"],
+      readingStrategy: "Priorize revisões sistemáticas e estudos primários recentes; registre referências em planilha.",
+    });
+  }
+
+  if (systemPrompt.includes("RESEARCH_THEME_TOOL")) {
+    const base = topic.slice(0, 50) || "área informada";
+    const themes = [1, 2, 3].map((n) => ({
+      title: `Tema ${n}: ${base} — recorte específico ${n}`,
+      delimitation: `Foco em aspecto ${n} delimitado ao contexto informado pelo aluno.`,
+      justification: "Relevância acadêmica e aplicabilidade para graduação.",
+      viability: "Viável com revisão bibliográfica e dados acessíveis.",
+      methodology: "Revisão integrativa ou estudo de caso, conforme orientação da instituição.",
+      keywords: [base.split(" ")[0] ?? "pesquisa", "graduação", `tema-${n}`],
+    }));
+    return JSON.stringify({
+      title: "Sugestões de temas — prévia",
+      themes,
+    });
+  }
+
   if (systemPrompt.includes("referência") || systemPrompt.includes("ABNT")) {
     return `[DEMO] Referência gerada:\n\nAUTOR, Nome. Título do trabalho: subtítulo. Ano. Disponível em: <${topic.slice(0, 40)}>. Acesso em: ${new Date().toLocaleDateString("pt-BR")}.\n\n* Configure OPENAI_API_KEY para referências precisas com dados reais.`;
+  }
+
+  if (systemPrompt.includes("TRANSFORMAÇÃO DE TEXTO")) {
+    const cleaned = userPrompt
+      .replace(/\n\nOpções:[\s\S]*$/, "")
+      .replace(/\n\n\[Entregue SOMENTE[\s\S]*$/, "")
+      .trim();
+    return cleaned.slice(0, 8000) || topic;
+  }
+
+  if (systemPrompt.includes("FIDELITY_PREAMBLE") || systemPrompt.includes("REGRAS OBRIGATÓRIAS DE FIDELIDADE")) {
+    const lines =
+      topicLines.length > 0
+        ? topicLines.map((line) => `- ${line}`).join("\n")
+        : `- ${topic.slice(0, 200)}`;
+    return `**Resumo do material enviado**\n\n${lines}\n\n*(Prévia local — conecte a OpenAI para resumo completo e fiel ao texto original.)*`;
+  }
+
+  if (systemPrompt.includes("DOCUMENTO ACADÊMICO COMPLETO")) {
+    const sectionTitle = topicLines[0]?.slice(0, 60) || topic.slice(0, 50);
+    return `# ${sectionTitle}
+
+## Introdução
+
+${topic.slice(0, 300)}
+
+## Desenvolvimento
+
+${topicLines.length > 0 ? topicLines.map((l, i) => `### ${i + 1}. ${l.slice(0, 70)}\n\nDesenvolvimento do ponto com base no material informado.`).join("\n\n") : "Análise dos pontos centrais do material enviado."}
+
+## Considerações finais
+
+Síntese dos aspectos abordados, com aplicação prática para o contexto acadêmico informado.
+
+*(Prévia local — conecte a OpenAI para documento completo.)*`;
   }
 
   if (json) {
@@ -519,18 +807,8 @@ function generateDemoResponse(
 
   const bulletPoints =
     topicLines.length > 0
-      ? topicLines.map((line) => `- **${line.slice(0, 70)}**`).join("\n")
-      : "1. **Conceito central** — Identificado a partir do material enviado\n2. **Relações teóricas** — Conexões com a literatura da área\n3. **Aplicações práticas** — Uso em trabalhos e provas";
+      ? topicLines.map((line) => `- ${line.slice(0, 70)}`).join("\n")
+      : `- ${topic.slice(0, 120)}`;
 
-  return `1 INTRODUÇÃO
-
-${topic.slice(0, 120)}
-
-2 DESENVOLVIMENTO
-
-${bulletPoints.replace(/^- /gm, "").split("\n").map((line, i) => `${i + 1}. ${line.replace(/\*\*/g, "")}`).join("\n\n")}
-
-3 CONSIDERAÇÕES FINAIS
-
-Síntese dos pontos centrais do material analisado, com aplicação para estudo e avaliação acadêmica.`;
+  return `${bulletPoints}\n\n*(Prévia local — configure OPENAI_API_KEY para resultado completo.)*`;
 }

@@ -144,7 +144,7 @@ export default function ImageCaptureUpload({
         stopCamera();
       },
       "image/jpeg",
-      0.92
+      0.95
     );
   };
 
@@ -205,7 +205,7 @@ export default function ImageCaptureUpload({
       {cameraOpen && (
         <div className="overflow-hidden rounded-xl border border-surface-200 bg-black">
           <div className="flex items-center justify-between bg-zinc-900 px-3 py-2 text-xs text-white">
-            <span>Enquadre a prova inteira</span>
+            <span>Enquadre a prova inteira — toque para focar</span>
             <button type="button" onClick={stopCamera} aria-label="Fechar câmera">
               <X size={16} />
             </button>
@@ -251,7 +251,8 @@ export default function ImageCaptureUpload({
       )}
 
       <p className="text-center text-[11px] leading-relaxed text-zinc-400">
-        JPG, PNG ou WEBP — até {MAX_IMAGES} fotos, 8 MB cada. Prova inteira legível, boa luz, sem blur.
+        JPG, PNG ou WEBP — até {MAX_IMAGES} fotos, 8 MB cada. Enquadre a página inteira, luz
+        uniforme, celular paralelo ao papel e toque na tela para focar antes de capturar.
       </p>
     </div>
   );

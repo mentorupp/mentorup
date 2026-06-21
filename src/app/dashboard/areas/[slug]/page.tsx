@@ -151,7 +151,7 @@ export default function AreaDetailPage() {
             <>
               <div className="mb-3 flex items-center justify-between gap-2">
                 <p className="text-xs font-medium text-accent-800">
-                  Pronto para copiar e colar no Word (ABNT)
+                  Resultado pronto para copiar
                 </p>
                 <button
                   type="button"

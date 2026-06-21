@@ -2,13 +2,13 @@ import type { ToolType, Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AIError, generateAI, parseAIJsonResult } from "@/lib/ai";
-import { USER_MATERIAL_SUFFIX } from "@/lib/ai-config";
 import { logActivity } from "@/lib/activity";
 import { auth } from "@/lib/auth";
 import { checkAndDeductCredits } from "@/lib/credits";
 import { prisma } from "@/lib/prisma";
 import { getToolById } from "@/lib/tools-config";
 import { TOOL_PROMPTS } from "@/lib/tool-prompts";
+import { postProcessToolResult, prepareToolRequest } from "@/lib/tool-engine";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -54,25 +54,22 @@ export async function POST(req: Request) {
       }
     }
 
-    let userPrompt = input;
-    if (options) {
-      userPrompt += "\n\nOpções: " + JSON.stringify(options);
-    }
-    if (!promptConfig.json) {
-      userPrompt += USER_MATERIAL_SUFFIX;
-    }
+    const { userPrompt, aiOptions } = prepareToolRequest(toolId, input, options);
 
     const aiResult = await generateAI(
       promptConfig.system,
       userPrompt,
       promptConfig.json,
-      { toolId }
+      aiOptions
     );
 
     let parsed: string | Record<string, unknown> = aiResult.text;
     if (promptConfig.json) {
       try {
         parsed = parseAIJsonResult(aiResult.text) as Record<string, unknown>;
+        if (parsed && typeof parsed === "object") {
+          parsed = postProcessToolResult(toolId, parsed, options);
+        }
       } catch {
         parsed = { raw: aiResult.text };
       }
